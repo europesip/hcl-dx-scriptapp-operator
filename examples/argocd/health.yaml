@@ -1,0 +1,26 @@
+# Health of the resources of the operator in ArgoCD, from their Ready condition:
+#   Ready=True -> Healthy · Waiting / not reconciled yet -> Progressing · Ready=False -> Degraded · suspended -> Suspended
+# Apply it as a patch of argocd-cm:  kubectl -n argocd patch configmap argocd-cm --patch-file health.yaml
+data:
+  resource.customizations.health.dx.europesip.com_ScriptApplication: &health |
+    hs = { status = "Progressing", message = "Waiting for the operator" }
+    if obj.metadata.generation ~= nil and obj.status ~= nil and obj.status.observedGeneration ~= nil
+       and obj.status.observedGeneration < obj.metadata.generation then
+      return hs
+    end
+    if obj.status ~= nil and obj.status.conditions ~= nil then
+      for _, c in ipairs(obj.status.conditions) do
+        if c.type == "Ready" then
+          hs.message = c.message
+          if c.status == "True" then hs.status = "Healthy"
+          elseif c.reason == "Suspended" then hs.status = "Suspended"
+          elseif c.reason == "Waiting" then hs.status = "Progressing"
+          else hs.status = "Degraded" end
+        end
+      end
+    end
+    return hs
+  resource.customizations.health.dx.europesip.com_DXPage: *health
+  resource.customizations.health.dx.europesip.com_DAMCollection: *health
+  resource.customizations.health.dx.europesip.com_PostgresDatabase: *health
+  resource.customizations.health.dx.europesip.com_DXConnection: *health

@@ -1,0 +1,19 @@
+# An ArgoCD Application with the samples of this repository. ArgoCD applies the resources; the operator does the
+# work in DX and reports it in their status (shown as health with the checks of health.yaml).
+# Before: the namespace and its Secrets (dx-admin, dx-ca), which do not belong in Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dxop-samples
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/europesip/hcl-dx-scriptapp-operator
+    targetRevision: main
+    path: samples
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dxop-samples
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

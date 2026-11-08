@@ -1,0 +1,14 @@
+# Every sample, for "kubectl apply -k samples" or an ArgoCD Application (examples/argocd). The namespace needs
+# the Secrets dx-admin and dx-ca first (see the README), and sample 04 the PostgreSQL superuser Secret.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-connection.yaml
+  - 01-hello/hello.yaml
+  - 02-image/hello-dx.yaml
+  - 03-dam/dam.yaml
+  - 04-backend-db/visits.yaml
+  - 05-bundle-image/clock.yaml
+  - 06-url/url.yaml
+  - 07-verify/verify.yaml
+  - 08-page/page.yaml

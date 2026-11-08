@@ -11,6 +11,6 @@ spec:
     url:
       url: https://codeload.github.com/europesip/hcl-dx-scriptapp-operator/tar.gz/refs/tags/v0.1.0
       path: hcl-dx-scriptapp-operator-0.1.0/samples/06-url/app
-      # sha256: <SHA256 of the archive>   # recommended
+      sha256: 5c26e5110a7787f24a51729350f9d772b5b85cdead8804952d9894bb259ba73c
   wcm:
     title: "DXOP · From a URL"

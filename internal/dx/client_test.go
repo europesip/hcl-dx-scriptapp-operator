@@ -65,3 +65,19 @@ func TestLoginWithLtpaToken2(t *testing.T) {
 		t.Fatalf("err %v, form logins %d", err, form)
 	}
 }
+
+// DX_FORM_LOGIN=false: the behaviour of 0.1.1 (REST login only)
+func TestFormLoginCanBeTurnedOff(t *testing.T) {
+	t.Setenv("DX_FORM_LOGIN", "false")
+	var form int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/wps/j_security_check" {
+			form++
+		}
+	}))
+	defer srv.Close()
+	c, _ := NewClient(Config{BaseURL: srv.URL, Username: "u", Password: "p"})
+	if err := c.Login(context.Background()); err != nil || form != 0 {
+		t.Fatalf("err %v, form logins %d: want none", err, form)
+	}
+}

@@ -16,6 +16,12 @@ dxclient:
 # operator only watches those (it still needs a ClusterRole to read the cluster-scoped CRDs).
 watchNamespaces: []
 
+dx:
+  # DX with OpenID Connect (Keycloak, Entra ID...): when the REST login of DX answers without a session cookie (Liberty
+  # renames it to WAS_n... with the OIDC client), sign in with the portal login form. Added in 0.1.2.
+  # false = the behaviour of 0.1.1 (REST login only).
+  oidcCompatibility: true
+
 replicas: 1                    # more than 1 only for high availability: leader election keeps one active
 leaderElection: true
 logLevel: info                 # info or debug

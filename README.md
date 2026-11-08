@@ -1,6 +1,6 @@
 # HCL DX Script Application operator
 
-[Español](README.es.md)
+[Español](README.es.md) · [Release history](CHANGELOG.md)
 
 **A Kubernetes operator that deploys HCL DX Script Applications and keeps them in DX exactly as declared:
 the application in WCM, its pages, its DAM files and the database of its backend. Declare it in YAML (or in
@@ -113,7 +113,7 @@ docker run --rm hclcr.io/dx-public/dxclient:v95_CF239_20261103-1404 /dxclient/bi
 ```
 
 ```bash
-helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.1.2 \
+helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.1.3 \
   -n dxop-system --create-namespace --set dxclient.acceptLicense=true
 ```
 

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -37,6 +38,10 @@ type Config struct {
 	ContentHandlerPath string
 	// VirtualPortalContext for pushes into a virtual portal.
 	VirtualPortalContext string
+	// NoFormLogin turns off the fallback to the portal form login (DX with OpenID Connect, since 0.1.2): with it, only
+	// the REST login is used, as up to 0.1.1. Set from the environment variable DX_FORM_LOGIN=false (chart value
+	// dx.oidcCompatibility=false).
+	NoFormLogin bool
 }
 
 // Host and port of the base URL, for DXClient.
@@ -64,6 +69,9 @@ type Client struct {
 // NewClient prepares a client; it signs in on the first call.
 func NewClient(cfg Config) (*Client, error) {
 	cfg.BaseURL = strings.TrimRight(cfg.BaseURL, "/")
+	if v := strings.ToLower(strings.TrimSpace(os.Getenv("DX_FORM_LOGIN"))); v == "false" || v == "never" || v == "0" {
+		cfg.NoFormLogin = true
+	}
 	if cfg.ContentHandlerPath == "" {
 		cfg.ContentHandlerPath = "/wps/mycontenthandler"
 	}
@@ -118,7 +126,7 @@ func (c *Client) loginLocked(ctx context.Context, force bool) error {
 	// The Ring API returns the LtpaToken2 cookie of the Web Engine. With OpenID Connect on (openidConnectClient-1.0),
 	// Liberty gives the SSO cookie a generated name (WAS_n...) and the REST login answers 200 without a cookie: sign
 	// in with the form login of the portal instead, which the Ring API accepts too (it forwards every cookie).
-	if !c.hasSessionCookie() {
+	if !c.hasSessionCookie() && !c.cfg.NoFormLogin {
 		if err := c.formLogin(ctx); err != nil {
 			return err
 		}

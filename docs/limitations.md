@@ -67,4 +67,8 @@
 - One active replica; DXClient runs are serialised, so many pushes queue up.
 - Tested with HCL DX Compose CF239 and DXClient `v95_CF239_20261103-1404`. Use the DXClient of your DX level by
   building the image with `--build-arg DXCLIENT_IMAGE=hclcr.io/dx-public/dxclient:<tag>`.
+- **DX with OpenID Connect (Keycloak, Entra ID...)**: supported from 0.1.2. With the OIDC client of Liberty the SSO
+  cookie gets a generated name (`WAS_n...` instead of `LtpaToken2`) and the DX REST login answers without a cookie, so the
+  operator falls back to the portal form login. The OIDC `authFilter` of DX must leave out `/wps/config` (XMLAccess,
+  documented by HCL), `j_security_check` and requests with `Authorization: Basic` (DXClient).
 - API `v1alpha1`: fields may still change before `v1`.

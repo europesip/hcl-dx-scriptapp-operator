@@ -61,14 +61,27 @@ metadata:
   name: visits-app-files
 data:
   index.html: |
-    <div id="dxop-visits" style="font-family:sans-serif;padding:1rem;border:1px solid #d6ddf5;border-radius:12px">
-      <b>Visits counter</b> · a Script Application with its own backend and PostgreSQL database
-      <p data-out>Counting…</p>
-      <button type="button" data-again>Count again</button>
-    </div>
-    <script>
-      (function () {
-        var root = document.getElementById("dxop-visits"), out = root.querySelector("[data-out]");
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <script src="visits.js" defer></script>
+      </head>
+      <body>
+        <div class="dxop-visits">
+          <b>Visits counter</b> · a Script Application with its own backend and PostgreSQL database
+          <p data-out>Counting…</p>
+          <button type="button" data-again>Count again</button>
+        </div>
+      </body>
+    </html>
+  visits.js: |
+    // Counts a visit in the backend of the application (same origin: published on the DX host)
+    (function () {
+      function start() {
+        var root = document.querySelector(".dxop-visits");
+        if (!root) { return setTimeout(start, 200); }
+        var out = root.querySelector("[data-out]");
         var id = localStorage.getItem("dxop-visitor") || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
         localStorage.setItem("dxop-visitor", id);
         function count() {
@@ -79,8 +92,9 @@ data:
         }
         root.querySelector("[data-again]").addEventListener("click", count);
         count();
-      })();
-    </script>
+      }
+      start();
+    })();
 ---
 apiVersion: dx.europesip.com/v1alpha1
 kind: ScriptApplication

@@ -5,10 +5,24 @@ metadata:
   name: hello-files
 data:
   index.html: |
-    <div class="dxop-hello" style="font-family:sans-serif;padding:1.5rem;border:2px solid #0040ff;border-radius:12px">
-      <h2 style="margin:0 0 .5rem;color:#0040ff">${GREETING}</h2>
-      <p style="margin:0">Deployed by the <b>HCL DX Script Application operator</b> from a ConfigMap · version ${VERSION}</p>
-    </div>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          /* scoped to the application: global CSS would restyle the DX theme */
+          .dxop-hello { font-family: sans-serif; padding: 1.5rem; border: 2px solid #0040ff; border-radius: 12px; }
+          .dxop-hello h2 { margin: 0 0 .5rem; color: #0040ff; }
+          .dxop-hello p { margin: 0; }
+        </style>
+      </head>
+      <body>
+        <div class="dxop-hello">
+          <h2>${GREETING}</h2>
+          <p>Deployed by the <b>HCL DX Script Application operator</b> from a ConfigMap · version ${VERSION}</p>
+        </div>
+      </body>
+    </html>
 ---
 apiVersion: dx.europesip.com/v1alpha1
 kind: ScriptApplication

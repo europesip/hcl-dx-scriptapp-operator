@@ -25,10 +25,22 @@ metadata:
   name: brand-app-files
 data:
   index.html: |
-    <div style="font-family:sans-serif;display:flex;gap:1rem;align-items:center;padding:1rem">
-      <img src="${LOGO_URL}" alt="logo" width="64" height="64" style="border-radius:8px">
-      <div><b>A logo served by the DX DAM</b><br><small>${LOGO_URL}</small></div>
-    </div>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          .dxop-brand { font-family: sans-serif; display: flex; gap: 1rem; align-items: center; padding: 1rem; }
+          .dxop-brand img { border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <div class="dxop-brand">
+          <img src="${LOGO_URL}" alt="logo" width="64" height="64">
+          <div><b>A logo served by the DX DAM</b><br><small>${LOGO_URL}</small></div>
+        </div>
+      </body>
+    </html>
 ---
 apiVersion: dx.europesip.com/v1alpha1
 kind: ScriptApplication

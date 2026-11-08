@@ -1,5 +1,6 @@
-# 08 · One page with several Script Applications (one under the other), visible to anonymous visitors, with its
-# own friendly name and position. The page is rebuilt only when its list of applications changes; title and
+# 08 · One page with several Script Applications (one under the other), with its own friendly name and
+# position. For anonymous visitors, set access.anonymous: true AND give anonymous users the User role on the
+# Script Application Library in DX (the operator cannot set WCM item permissions, see the limitations). The page is rebuilt only when its list of applications changes; title and
 # access changes keep the layout and the settings made on it.
 apiVersion: dx.europesip.com/v1alpha1
 kind: DXPage
@@ -10,7 +11,6 @@ spec:
   friendlyName: dxop-showcase
   titles: { en: "DXOP Showcase", es: "DXOP Escaparate" }
   ordinal: 900
-  access: { anonymous: true }
   applications:
     - name: dxop-brand
     - name: dxop-clock

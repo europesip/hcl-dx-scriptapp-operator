@@ -1,0 +1,18 @@
+# 08 · One page with several Script Applications (one under the other), visible to anonymous visitors, with its
+# own friendly name and position. The page is rebuilt only when its list of applications changes; title and
+# access changes keep the layout and the settings made on it.
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXPage
+metadata:
+  name: dxop-showcase
+spec:
+  connectionRef: { name: dx }
+  friendlyName: dxop-showcase
+  titles: { en: "DXOP Showcase", es: "DXOP Escaparate" }
+  ordinal: 900
+  access: { anonymous: true }
+  applications:
+    - name: dxop-brand
+    - name: dxop-clock
+    - name: dxop-hello
+  deletionPolicy: Delete       # delete the page in DX when this resource is deleted

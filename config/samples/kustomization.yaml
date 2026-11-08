@@ -1,0 +1,8 @@
+## Append samples of your project ##
+resources:
+- dx_v1alpha1_dxconnection.yaml
+- dx_v1alpha1_scriptapplication.yaml
+- dx_v1alpha1_dxpage.yaml
+- dx_v1alpha1_damcollection.yaml
+- dx_v1alpha1_postgresdatabase.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

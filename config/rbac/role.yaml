@@ -1,0 +1,91 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - damcollections
+  - dxpages
+  - postgresdatabases
+  - scriptapplications
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - damcollections/finalizers
+  - dxpages/finalizers
+  - postgresdatabases/finalizers
+  - scriptapplications/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - damcollections/status
+  - dxconnections/status
+  - dxpages/status
+  - postgresdatabases/status
+  - scriptapplications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - dxconnections
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - patch

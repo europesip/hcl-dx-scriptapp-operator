@@ -1,0 +1,41 @@
+# HCL DX Script Application operator
+
+image:
+  repository: ghcr.io/europesip/hcl-dx-scriptapp-operator
+  tag: ""                      # default: the chart appVersion
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# The operator image includes HCL DXClient (from HCL's public image hclcr.io/dx-public/dxclient), which is HCL
+# software under its own licence. The chart refuses to install until you accept it. Read it with:
+#   docker run --rm hclcr.io/dx-public/dxclient:v95_CF239_20261103-1404 /dxclient/bin/dxclient accept-license
+dxclient:
+  acceptLicense: false
+
+# Namespaces whose resources the operator reconciles. Empty: all namespaces (ClusterRole). With a list, the
+# operator only watches those (it still needs a ClusterRole to read the cluster-scoped CRDs).
+watchNamespaces: []
+
+replicas: 1                    # more than 1 only for high availability: leader election keeps one active
+leaderElection: true
+logLevel: info                 # info or debug
+
+resources:
+  requests: { cpu: 50m, memory: 192Mi }
+  limits: { memory: 1Gi }      # DXClient (Node.js) runs inside the pod during pushes
+
+# Working folder: cache of the sources (by revision) and working copies of the applications
+workDir:
+  sizeLimit: 2Gi
+
+podAnnotations: {}
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}

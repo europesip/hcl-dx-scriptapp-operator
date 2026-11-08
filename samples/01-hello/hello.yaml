@@ -1,0 +1,35 @@
+# 01 · The smallest Script Application: one HTML file in a ConfigMap, a substitution and a page.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-files
+data:
+  index.html: |
+    <div class="dxop-hello" style="font-family:sans-serif;padding:1.5rem;border:2px solid #0040ff;border-radius:12px">
+      <h2 style="margin:0 0 .5rem;color:#0040ff">${GREETING}</h2>
+      <p style="margin:0">Deployed by the <b>HCL DX Script Application operator</b> from a ConfigMap · version ${VERSION}</p>
+    </div>
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-hello
+spec:
+  connectionRef: { name: dx }
+  source:
+    configMap: { name: hello-files }
+  wcm:
+    title: "DXOP · Hello"
+  substitutions:
+    - { name: GREETING, value: "Hello from Kubernetes!" }
+    - { name: VERSION, value: "1.0.0" }
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXPage
+metadata:
+  name: dxop-hello
+spec:
+  connectionRef: { name: dx }
+  titles: { en: "DXOP Hello", es: "DXOP Hola" }
+  applications:
+    - name: dxop-hello

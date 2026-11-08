@@ -1,0 +1,50 @@
+{{- if .Values.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "dxop.serviceAccount" . }}
+  labels: {{- include "dxop.labels" . | nindent 4 }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{- end }}
+# What the operator reads and changes in the cluster (generated from the code: files/rules.yaml)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "dxop.fullname" . }}
+  labels: {{- include "dxop.labels" . | nindent 4 }}
+{{ .Files.Get "files/rules.yaml" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "dxop.fullname" . }}
+  labels: {{- include "dxop.labels" . | nindent 4 }}
+roleRef: { apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: {{ include "dxop.fullname" . }} }
+subjects:
+  - { kind: ServiceAccount, name: {{ include "dxop.serviceAccount" . }}, namespace: {{ .Release.Namespace }} }
+---
+# Leader election (Lease in the namespace of the operator)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "dxop.fullname" . }}-leader-election
+  labels: {{- include "dxop.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "dxop.fullname" . }}-leader-election
+  labels: {{- include "dxop.labels" . | nindent 4 }}
+roleRef: { apiGroup: rbac.authorization.k8s.io, kind: Role, name: {{ include "dxop.fullname" . }}-leader-election }
+subjects:
+  - { kind: ServiceAccount, name: {{ include "dxop.serviceAccount" . }}, namespace: {{ .Release.Namespace }} }

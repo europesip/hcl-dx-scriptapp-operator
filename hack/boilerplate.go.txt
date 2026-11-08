@@ -1,0 +1,5 @@
+/*
+Copyright YEAR EUROPESIP.
+
+Licensed under the MIT License (see LICENSE).
+*/

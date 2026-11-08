@@ -1,0 +1,18 @@
+# 05 · A bundle image with several files in folders (HTML, CSS, JS): the same build for every environment, the
+# differences (city, time zone) in substitutions. Pin the digest in production: ref: ...@sha256:...
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-clock
+spec:
+  connectionRef: { name: dx }
+  source:
+    image:
+      ref: ghcr.io/europesip/hcl-dx-scriptapp-operator/sample-clock:0.1.0
+      path: /app
+  wcm:
+    title: "DXOP · Clock (bundle image)"
+  substitutions:
+    - { name: CITY, value: Madrid }
+    - { name: TIME_ZONE, value: Europe/Madrid }
+    - { name: VERSION, value: "0.1.0" }

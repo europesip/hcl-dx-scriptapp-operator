@@ -1,0 +1,9 @@
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  labels:
+    app.kubernetes.io/name: hcl-dx-scriptapp-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: scriptapplication-sample
+spec:
+  # TODO(user): Add fields here

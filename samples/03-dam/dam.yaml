@@ -1,0 +1,46 @@
+# 03 · Files in the DAM and their URL in a Script Application. The DAMCollection uploads every file of its
+# source as an asset (a changed file becomes a new version: same URL). The application gets the URL of the
+# logo through a substitution, and the operator waits for the collection before pushing it.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brand-files
+binaryData:
+  logo.png: iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAIAAABt+uBvAAAAmklEQVR42u3ZoQ0AMAgAQXSnYqDub2EDBElNc8lPcPYjsjSFABAgQIAAAQIESIAAAQIECBAgQAIECBAgQIAAARIgQIAAAQIECBAgAVpV52oIECBAgAABAgQIkAABAgQIECBAgAQIECBAgAD9AWQNOquAAAECBAgQIAECBAgQIECAAAkQIECAAAECBEiAAAECBAgQIECABAjQgxqPIcSzRm6MOQAAAABJRU5ErkJggg==
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: DAMCollection
+metadata:
+  name: dxop-brand
+spec:
+  connectionRef: { name: dx }
+  description: Images of the DXOP samples (managed by the HCL DX Script Application operator)
+  source:
+    configMap: { name: brand-files }
+  access: { anonymous: true }       # public images
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brand-app-files
+data:
+  index.html: |
+    <div style="font-family:sans-serif;display:flex;gap:1rem;align-items:center;padding:1rem">
+      <img src="${LOGO_URL}" alt="logo" width="64" height="64" style="border-radius:8px">
+      <div><b>A logo served by the DX DAM</b><br><small>${LOGO_URL}</small></div>
+    </div>
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-brand
+spec:
+  connectionRef: { name: dx }
+  source:
+    configMap: { name: brand-app-files }
+  wcm:
+    title: "DXOP · DAM logo"
+  substitutions:
+    - name: LOGO_URL
+      valueFrom:
+        damAsset: { collection: dxop-brand, asset: logo.png }

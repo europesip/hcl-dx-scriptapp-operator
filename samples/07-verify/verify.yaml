@@ -1,0 +1,14 @@
+# 07 · Verify mode: for an environment that receives the application by syndication (or any other way). The
+# operator never pushes it: it only checks that it is there and reports it (Ready / NotFound, events). Here it
+# checks the application of sample 01 by its WCM name.
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-hello-check
+spec:
+  connectionRef: { name: dx }
+  mode: Verify
+  source:
+    configMap: { name: hello-files }       # not used in Verify mode (the source is required by the schema)
+  wcm:
+    name: dxop-hello

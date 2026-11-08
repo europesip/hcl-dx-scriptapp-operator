@@ -1,0 +1,13 @@
+# The connection to DX shared by the samples of this namespace.
+# Create the two Secrets first (see the README):
+#   kubectl -n dxop-samples create secret generic dx-admin --from-literal=username=<DX admin> --from-literal=password=<password>
+#   kubectl -n dxop-samples create secret generic dx-ca --from-file=ca.crt=<DX certificate or CA>   # self-signed / private CA only
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXConnection
+metadata:
+  name: dx
+spec:
+  url: https://dx-demo.apps.promox.europesip-lab.com     # your DX host
+  credentialsSecret: { name: dx-admin }
+  caSecret: { name: dx-ca }
+  resyncInterval: 2m       # how often everything is checked against DX (default 10m)

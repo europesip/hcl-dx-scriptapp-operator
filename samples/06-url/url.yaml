@@ -1,0 +1,16 @@
+# 06 · A Script Application from an archive URL (.tar.gz, .tgz or .zip): a CI artifact or a GitHub release.
+# Here, a folder of the archive of a tag of this repository. With sha256, the download is checked and only done
+# again when the value changes.
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-url
+spec:
+  connectionRef: { name: dx }
+  source:
+    url:
+      url: https://codeload.github.com/europesip/hcl-dx-scriptapp-operator/tar.gz/refs/tags/v0.1.0
+      path: hcl-dx-scriptapp-operator-0.1.0/samples/06-url/app
+      # sha256: <SHA256 of the archive>   # recommended
+  wcm:
+    title: "DXOP · From a URL"

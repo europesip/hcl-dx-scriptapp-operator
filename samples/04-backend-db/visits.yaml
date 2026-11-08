@@ -1,0 +1,108 @@
+# 04 · A Script Application with its own backend and database. The operator creates the database and its owner
+# in an existing PostgreSQL (and a Secret with the connection details for the backend), and only pushes the
+# Script Application when the backend is available (dependsOn). The backend is published on the DX host
+# (same origin: the browser sends the DX session, no CORS).
+apiVersion: dx.europesip.com/v1alpha1
+kind: PostgresDatabase
+metadata:
+  name: dxop-visits
+spec:
+  host: dx-pg-rw.dx-shared.svc.cluster.local     # your PostgreSQL server
+  superuserSecret: { name: dx-pg-superuser }      # a user that can create roles and databases
+  superuserSecretNamespace: dx-shared
+  database: dxop_visits
+  secretName: dxop-visits-db                      # written by the operator: username, password, uri, jdbcUrl...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dxop-visits-api
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: dxop-visits-api } }
+  template:
+    metadata: { labels: { app: dxop-visits-api } }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/europesip/hcl-dx-scriptapp-operator/sample-visits-api:0.1.0
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: dxop-visits-db, key: uri } }
+          ports: [{ containerPort: 8080 }]
+          readinessProbe: { httpGet: { path: /healthz, port: 8080 } }
+          resources: { requests: { cpu: 10m, memory: 32Mi }, limits: { memory: 64Mi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dxop-visits-api
+spec:
+  selector: { app: dxop-visits-api }
+  ports: [{ port: 80, targetPort: 8080 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dxop-visits-api
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: dx-demo.apps.promox.europesip-lab.com   # the DX host
+      http:
+        paths:
+          - path: /dxop-visits
+            pathType: Prefix
+            backend: { service: { name: dxop-visits-api, port: { number: 80 } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: visits-app-files
+data:
+  index.html: |
+    <div id="dxop-visits" style="font-family:sans-serif;padding:1rem;border:1px solid #d6ddf5;border-radius:12px">
+      <b>Visits counter</b> · a Script Application with its own backend and PostgreSQL database
+      <p data-out>Counting…</p>
+      <button type="button" data-again>Count again</button>
+    </div>
+    <script>
+      (function () {
+        var root = document.getElementById("dxop-visits"), out = root.querySelector("[data-out]");
+        var id = localStorage.getItem("dxop-visitor") || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+        localStorage.setItem("dxop-visitor", id);
+        function count() {
+          fetch("${API_PATH}/api/visits?user=" + encodeURIComponent(id), { method: "POST" })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { out.textContent = "Your visits: " + d.count + " · all visitors: " + d.total + " (" + d.users + " visitors)"; })
+            .catch(function (e) { out.textContent = "The backend did not answer: " + e; });
+        }
+        root.querySelector("[data-again]").addEventListener("click", count);
+        count();
+      })();
+    </script>
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: ScriptApplication
+metadata:
+  name: dxop-visits
+spec:
+  connectionRef: { name: dx }
+  source:
+    configMap: { name: visits-app-files }
+  wcm:
+    title: "DXOP · Visits (backend + PostgreSQL)"
+  substitutions:
+    - { name: API_PATH, value: /dxop-visits }
+  dependsOn:
+    - { kind: Deployment, name: dxop-visits-api }
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXPage
+metadata:
+  name: dxop-visits
+spec:
+  connectionRef: { name: dx }
+  titles: { en: "DXOP Visits", es: "DXOP Visitas" }
+  applications:
+    - name: dxop-visits

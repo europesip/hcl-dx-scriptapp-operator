@@ -118,3 +118,21 @@ func TestReloginDropsStaleCookie(t *testing.T) {
 		t.Fatalf("after the restart of DX: %d, want 200 (a new form login)", s)
 	}
 }
+
+// DX sometimes answers XMLAccess with an empty HTTP 200: it is retried.
+func TestXMLAccessRetriesEmptyAnswer(t *testing.T) {
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		if calls == 1 {
+			return // empty 200
+		}
+		_, _ = w.Write([]byte(`<request><status element="all" result="ok"/></request>`))
+	}))
+	defer srv.Close()
+	c, _ := NewClient(Config{BaseURL: srv.URL, Username: "u", Password: "p"})
+	out, err := c.XMLAccess(context.Background(), "<request/>")
+	if err != nil || calls != 2 || out == "" {
+		t.Fatalf("calls %d, err %v", calls, err)
+	}
+}

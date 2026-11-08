@@ -281,7 +281,33 @@ func (c *Client) doJSON(ctx context.Context, method, path string, in, out any) (
 
 // XMLAccess sends an XMLAccess request to the XML configuration endpoint of DX (/wps/config, the one
 // DXClient uses), with basic authentication, and returns DX's XML answer (also when it reports a failure).
+// xmlAccessLocks serialise the XMLAccess calls to each DX: DX answers concurrent XMLAccess requests with an empty
+// HTTP 200 now and then (seen on DX Compose CF239 when a page and a theme were checked at the same time).
+var xmlAccessLocks sync.Map // base URL -> *sync.Mutex
+
 func (c *Client) XMLAccess(ctx context.Context, request string) (string, error) {
+	mu, _ := xmlAccessLocks.LoadOrStore(c.cfg.BaseURL, &sync.Mutex{})
+	mu.(*sync.Mutex).Lock()
+	defer mu.(*sync.Mutex).Unlock()
+	var last error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 { // an empty answer is retried after a short pause
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(time.Duration(attempt) * 2 * time.Second):
+			}
+		}
+		out, empty, err := c.xmlAccessOnce(ctx, request)
+		if err == nil || !empty {
+			return out, err
+		}
+		last = err
+	}
+	return "", last
+}
+
+func (c *Client) xmlAccessOnce(ctx context.Context, request string) (string, bool, error) {
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, c.cfg.BaseURL+"/wps/config", strings.NewReader(request))
 	req.SetBasicAuth(c.cfg.Username, c.cfg.Password)
 	req.Header.Set("Content-Type", "text/xml; charset=UTF-8")
@@ -289,14 +315,15 @@ func (c *Client) XMLAccess(ctx context.Context, request string) (string, error) 
 	hc.Jar = nil // basic authentication only: with the session cookie as well, DX answers 403
 	resp, err := hc.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("XMLAccess: %w", err)
+		return "", false, fmt.Errorf("XMLAccess: %w", err)
 	}
 	defer resp.Body.Close() //nolint:errcheck
 	data, _ := io.ReadAll(resp.Body)
 	if !bytes.Contains(data, []byte("<request")) {
-		return "", fmt.Errorf("XMLAccess answered HTTP %d without an XML result: %.200s", resp.StatusCode, data)
+		return "", resp.StatusCode == http.StatusOK && len(bytes.TrimSpace(data)) == 0,
+			fmt.Errorf("XMLAccess answered HTTP %d without an XML result: %.200s", resp.StatusCode, data)
 	}
-	return string(data), nil
+	return string(data), false, nil
 }
 
 // ---------------------------------------------------------------------------------------------- WCM

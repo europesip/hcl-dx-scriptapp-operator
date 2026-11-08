@@ -5,6 +5,13 @@
 To go back to an earlier release: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <version> --reuse-values`
 (0.3.0 renamed the resources: see its notes).
 
+## 0.3.1 · 2026-11-08 · XMLAccess, one call at a time
+
+- **Fix:** DX answers concurrent XMLAccess requests with an empty HTTP 200 now and then; the resource went to `DXError`
+  (and ArgoCD showed it Degraded) until the next check. The operator now sends one XMLAccess request at a time to each
+  DX, and retries an empty answer twice (after 2 and 4 seconds). Seen on DX Compose CF239 when a page and a theme were
+  checked at the same moment.
+
 ## 0.3.0 · 2026-11-08 · DX prefix, DXDatabase for every engine, themes of their own
 
 **Breaking: the resources were renamed** so that every one has the DX prefix:

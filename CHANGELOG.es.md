@@ -5,6 +5,13 @@
 Para volver a una versión anterior: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <versión> --reuse-values`
 (la 0.3.0 renombró los recursos: mira sus notas).
 
+## 0.3.1 · 2026-11-08 · XMLAccess, de una en una
+
+- **Corrección:** DX responde a veces con un HTTP 200 vacío cuando recibe peticiones XMLAccess simultáneas; el recurso
+  pasaba a `DXError` (y ArgoCD lo mostraba Degraded) hasta la siguiente comprobación. Ahora el operador envía una sola
+  petición XMLAccess a la vez a cada DX y repite dos veces una respuesta vacía (a los 2 y 4 segundos). Visto en DX
+  Compose CF239 al comprobar una página y un tema en el mismo momento.
+
 ## 0.3.0 · 2026-11-08 · Prefijo DX, DXDatabase para cualquier motor, temas propios
 
 **Cambio incompatible: los recursos se han renombrado** para que todos lleven el prefijo DX:

@@ -74,11 +74,9 @@ func (r *ScriptApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Re
 				log.Info("cannot remove the application from DX yet", "reason", err.Error())
 				return ctrl.Result{RequeueAfter: waitShort}, nil
 			}
-			if _, err := r.DXClient.Undeploy(ctx, conn.Config, sa.Status.ContentID); err != nil {
-				if _, gerr := conn.Client.GetContent(ctx, sa.Status.ContentID); !errors.Is(gerr, dx.ErrNotFound) {
-					r.Recorder.Eventf(&sa, nil, corev1.EventTypeWarning, "UndeployFailed", "Delete", "%v", err)
-					return ctrl.Result{RequeueAfter: retryFailed}, nil
-				}
+			if err := conn.Client.DeleteContent(ctx, sa.Status.ContentID); err != nil {
+				r.Recorder.Eventf(&sa, nil, corev1.EventTypeWarning, "UndeployFailed", "Delete", "%v", err)
+				return ctrl.Result{RequeueAfter: retryFailed}, nil
 			}
 			r.Recorder.Eventf(&sa, nil, corev1.EventTypeNormal, "Undeployed", "Delete", "removed %s from DX", sa.Status.ContentID)
 		}

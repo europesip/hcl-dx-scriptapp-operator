@@ -178,15 +178,6 @@ func (d *DXClient) Push(ctx context.Context, cfg Config, p PushRequest) (string,
 	return m[1], out, nil
 }
 
-// Undeploy removes a Script Application from WCM by its content ID.
-func (d *DXClient) Undeploy(ctx context.Context, cfg Config, id string) (string, error) {
-	out, err := d.run(ctx, cfg, nil, 5*time.Minute, "undeploy-scriptapplication", "--wcmContentId", id, "-f")
-	if err != nil {
-		return out, fmt.Errorf("undeploy of %s failed: %s", id, lastLines(out, 3))
-	}
-	return out, nil
-}
-
 func lastLines(s string, n int) string {
 	lines := strings.Split(strings.TrimSpace(s), "\n")
 	if len(lines) > n {

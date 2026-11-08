@@ -251,6 +251,20 @@ func (c *Client) FindContentByName(ctx context.Context, name string) (*Content, 
 	return nil, nil
 }
 
+// DeleteContent deletes a WCM content item (a Script Application) with WCM REST v2. DXClient's
+// undeploy-scriptapplication is not used: it refuses while a page that used the application is only marked for
+// deletion (DX removes deleted pages later, with its cleanup task).
+func (c *Client) DeleteContent(ctx context.Context, id string) error {
+	r, err := c.Do(ctx, http.MethodDelete, c.cfg.ContentHandlerPath+"/wcmrest-v2/contents/"+url.PathEscape(id), nil, "")
+	if err != nil {
+		return err
+	}
+	if r.Status == http.StatusNotFound || r.Status < 300 {
+		return nil
+	}
+	return fmt.Errorf("delete of content %s answered HTTP %d: %.300s", id, r.Status, r.Body)
+}
+
 // ---------------------------------------------------------------------------------------------- DAM
 
 const dam = "/dx/api/dam/v1"
@@ -304,7 +318,8 @@ func (c *Client) CreateCollection(ctx context.Context, name, description string)
 
 // DeleteCollection deletes a collection with its assets.
 func (c *Client) DeleteCollection(ctx context.Context, id string) error {
-	_, err := c.doJSON(ctx, http.MethodDelete, dam+"/collections/"+url.PathEscape(id), nil, nil)
+	// ignoreMediaReferences: the assets may be used by Script Applications or pages (they then show a broken link)
+	_, err := c.doJSON(ctx, http.MethodDelete, dam+"/collections/"+url.PathEscape(id)+"?ignoreMediaReferences=true", nil, nil)
 	if errors.Is(err, ErrNotFound) {
 		return nil
 	}

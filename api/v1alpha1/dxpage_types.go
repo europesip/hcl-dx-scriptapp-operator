@@ -29,7 +29,7 @@ type DXPageSpec struct {
 	// Titles by locale, for example {en: "Time off", es: "Vacaciones"}.
 	// +kubebuilder:validation:MinProperties=1
 	Titles map[string]string `json:"titles"`
-	// Applications shown on the page, one under the other: names of ScriptApplication resources in the same
+	// Applications shown on the page, one under the other: names of DXScriptApplication resources in the same
 	// namespace (each one in a Web Content Viewer). They become dependencies of the page.
 	// +kubebuilder:validation:MinItems=1
 	Applications []LocalObjectReference `json:"applications"`

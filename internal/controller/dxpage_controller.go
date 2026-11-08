@@ -94,7 +94,7 @@ func (r *DXPageReconciler) reconcile(ctx context.Context, p *dxv1.DXPage) (ctrl.
 	// 1. Dependencies: the applications of the page and the explicit ones
 	deps := append([]dxv1.Dependency{}, p.Spec.DependsOn...)
 	for _, a := range p.Spec.Applications {
-		deps = append(deps, dxv1.Dependency{Kind: "ScriptApplication", Name: a.Name})
+		deps = append(deps, dxv1.Dependency{Kind: "DXScriptApplication", Name: a.Name})
 	}
 	if err := Dependencies(ctx, r.Client, p.Namespace, deps); err != nil {
 		if isNotReady(err) {
@@ -117,9 +117,9 @@ func (r *DXPageReconciler) reconcile(ctx context.Context, p *dxv1.DXPage) (ctrl.
 	// 2. The page as declared: content IDs of its applications, in order
 	var ids []string
 	for _, a := range p.Spec.Applications {
-		var sa dxv1.ScriptApplication
+		var sa dxv1.DXScriptApplication
 		if err := r.Get(ctx, client.ObjectKey{Namespace: p.Namespace, Name: a.Name}, &sa); err != nil || sa.Status.ContentID == "" {
-			fail("Waiting", fmt.Sprintf("waiting for the content ID of ScriptApplication %s", a.Name), waitShort)
+			fail("Waiting", fmt.Sprintf("waiting for the content ID of DXScriptApplication %s", a.Name), waitShort)
 			return ctrl.Result{RequeueAfter: waitShort}, nil
 		}
 		ids = append(ids, sa.Status.ContentID)
@@ -243,7 +243,7 @@ func pageRefs(list *dxv1.DXPageList) map[client.ObjectKey][]refersTo {
 		p := &list.Items[i]
 		rs := []refersTo{{"DXConnection", p.Spec.ConnectionRef.Name}}
 		for _, a := range p.Spec.Applications {
-			rs = append(rs, refersTo{"ScriptApplication", a.Name})
+			rs = append(rs, refersTo{"DXScriptApplication", a.Name})
 		}
 		for _, d := range p.Spec.DependsOn {
 			rs = append(rs, refersTo{d.Kind, d.Name})
@@ -261,7 +261,7 @@ func (r *DXPageReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&dxv1.DXPage{}, builder.WithPredicates(predicate.Or(predicate.GenerationChangedPredicate{}, predicate.AnnotationChangedPredicate{}))).
-		Watches(&dxv1.ScriptApplication{}, m("ScriptApplication")).
+		Watches(&dxv1.DXScriptApplication{}, m("DXScriptApplication")).
 		Watches(&dxv1.DXConnection{}, m("DXConnection")).
 		Named("dxpage").
 		Complete(r)

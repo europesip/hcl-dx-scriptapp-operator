@@ -24,18 +24,18 @@ import (
 	"github.com/europesip/hcl-dx-scriptapp-operator/internal/source"
 )
 
-// DAMCollectionReconciler keeps DAM collections with the files of their source.
-type DAMCollectionReconciler struct {
+// DXDamCollectionReconciler keeps DAM collections with the files of their source.
+type DXDamCollectionReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 	*Shared
 }
 
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=damcollections,verbs=get;list;watch;update;patch
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=damcollections/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=damcollections/finalizers,verbs=update
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxdamcollections,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxdamcollections/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxdamcollections/finalizers,verbs=update
 
-func collectionName(c *dxv1.DAMCollection) string {
+func collectionName(c *dxv1.DXDamCollection) string {
 	if c.Spec.CollectionName != "" {
 		return c.Spec.CollectionName
 	}
@@ -44,9 +44,9 @@ func collectionName(c *dxv1.DAMCollection) string {
 
 // Reconcile creates the collection, uploads new and changed files (a changed file becomes a new version of
 // the same asset, so its URL does not change), and restores what was deleted in DX.
-func (r *DAMCollectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *DXDamCollectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
-	var c dxv1.DAMCollection
+	var c dxv1.DXDamCollection
 	if err := r.Get(ctx, req.NamespacedName, &c); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -87,7 +87,7 @@ func (r *DAMCollectionReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	return res, err
 }
 
-func (r *DAMCollectionReconciler) reconcile(ctx context.Context, c *dxv1.DAMCollection) (ctrl.Result, error) {
+func (r *DXDamCollectionReconciler) reconcile(ctx context.Context, c *dxv1.DXDamCollection) (ctrl.Result, error) {
 	gen := c.Generation
 	fail := func(reason string, err error, after time.Duration) (ctrl.Result, error) {
 		setCondition(&c.Status.Conditions, gen, dxv1.ConditionReady, false, reason, err.Error())
@@ -238,14 +238,14 @@ func (r *DAMCollectionReconciler) reconcile(ctx context.Context, c *dxv1.DAMColl
 	return ctrl.Result{RequeueAfter: conn.Resync()}, nil
 }
 
-func (r *DAMCollectionReconciler) reportDrift(c *dxv1.DAMCollection, conn *Connection, msg string) (ctrl.Result, error) {
+func (r *DXDamCollectionReconciler) reportDrift(c *dxv1.DXDamCollection, conn *Connection, msg string) (ctrl.Result, error) {
 	setCondition(&c.Status.Conditions, c.Generation, dxv1.ConditionDrifted, true, "Drifted", msg)
 	setCondition(&c.Status.Conditions, c.Generation, dxv1.ConditionReady, false, "Drifted", msg)
 	r.Recorder.Eventf(c, nil, corev1.EventTypeWarning, "Drifted", "Check", "%s (driftPolicy Report: not restored)", msg)
 	return ctrl.Result{RequeueAfter: conn.Resync()}, nil
 }
 
-func damRefs(list *dxv1.DAMCollectionList) map[client.ObjectKey][]refersTo {
+func damRefs(list *dxv1.DXDamCollectionList) map[client.ObjectKey][]refersTo {
 	out := map[client.ObjectKey][]refersTo{}
 	for i := range list.Items {
 		c := &list.Items[i]
@@ -262,15 +262,15 @@ func damRefs(list *dxv1.DAMCollectionList) map[client.ObjectKey][]refersTo {
 }
 
 // SetupWithManager sets up the controller.
-func (r *DAMCollectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	newList := func() *dxv1.DAMCollectionList { return &dxv1.DAMCollectionList{} }
+func (r *DXDamCollectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	newList := func() *dxv1.DXDamCollectionList { return &dxv1.DXDamCollectionList{} }
 	m := func(kind string) handler.EventHandler {
 		return handler.EnqueueRequestsFromMapFunc(mapReferrers(r.Client, newList, damRefs, kind))
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dxv1.DAMCollection{}, builder.WithPredicates(predicate.Or(predicate.GenerationChangedPredicate{}, predicate.AnnotationChangedPredicate{}))).
+		For(&dxv1.DXDamCollection{}, builder.WithPredicates(predicate.Or(predicate.GenerationChangedPredicate{}, predicate.AnnotationChangedPredicate{}))).
 		Watches(&corev1.ConfigMap{}, m("ConfigMap")).
 		Watches(&dxv1.DXConnection{}, m("DXConnection")).
-		Named("damcollection").
+		Named("dxdamcollection").
 		Complete(r)
 }

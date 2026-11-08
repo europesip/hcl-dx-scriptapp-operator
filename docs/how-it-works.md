@@ -8,10 +8,10 @@
                           Kubernetes                                         HCL DX
  ┌───────────────────────────────────────────────────────┐        ┌──────────────────────────────┐
  │ DXConnection ──┐                                      │        │                              │
- │ ScriptApplication ─┐  ┌──────────────────────────┐   │ push   │ WCM: Script Application      │
+ │ DXScriptApplication ─┐  ┌──────────────────────────┐   │ push   │ WCM: Script Application      │
  │ DXPage ────────────┼─►│ operator (one pod)       │───┼───────►│      Library (DXClient)      │
- │ DAMCollection ─────┤  │  · controllers           │   │ XML    │ Pages (XMLAccess /wps/config)│
- │ PostgresDatabase ──┘  │  · DXClient (/dxclient)  │───┼───────►│ DAM (REST /dx/api/dam/v1)    │
+ │ DXDamCollection ─────┤  │  · controllers           │   │ XML    │ Pages (XMLAccess /wps/config)│
+ │ DXDatabase ──┘  │  · DXClient (/dxclient)  │───┼───────►│ DAM (REST /dx/api/dam/v1)    │
  │                       │  · source cache          │   │ check  │ Ring API (/dx/api/core/v1)   │
  │ Deployments, Jobs ───►│  (dependsOn)             │───┼───────►│                              │
  │                       └──────────┬───────────────┘   │        └──────────────────────────────┘
@@ -47,7 +47,7 @@ its DXConnection (default 10 minutes). Each pass:
 
 Writes to the status are merge patches, so concurrent passes do not lose what was done in DX.
 
-### ScriptApplication
+### DXScriptApplication
 
 - **Prepare**: get the source; copy it to a working folder; replace the `${NAME}` placeholders of
   `substitutions` in the text files (`.html .htm .js .mjs .css .json .txt .svg .xml`; other `${...}` are left
@@ -90,20 +90,23 @@ Writes to the status are merge patches, so concurrent passes do not lose what wa
 
 ### DXTheme
 
-- **Desired**: the spec (folder, unique name, titles, base, head HTML) and the revision of its source, as a hash.
+- **Desired**: the spec (folder, unique name, titles, base, profile, layout, head HTML) and the revision of its
+  source, as a hash.
 - **Actual**: an XMLAccess export of the theme by unique name (the applied hash is kept in the theme as the parameter
   `dxop.hash`) and a WebDAV listing of its folder (`dav:fs-type1/themes/<folder>/`).
-- **Apply**: download every file of the base theme over WebDAV, put the files of the source on top (same paths),
+- **Apply**: with `base.copyFiles: false` (a theme of its own) only the files of the source; otherwise download every
+  file of the base theme over WebDAV first and put the files of the source on top (same paths), then
   insert the head HTML before `</head>` in `theme.html`, `theme_sidenav.html` and their language versions, upload
   the folder (MKCOL + PUT), and register the theme with a copy of the registration of the base theme (new unique
-  name, templates pointing at the new folder, `default="false"`, only the declared titles).
+  name, templates pointing at the new folder, `default="false"`, only the declared titles, and `profile` / `layout`
+  when they are set).
 - **Drift**: registration or folder missing in DX → upload and register again (`Restore`) or report.
 - **Delete** (policy Delete): delete the registration (XMLAccess) and the folder (WebDAV). Pages that use it fall
   back to the default theme.
 - WebDAV and XMLAccess use basic auth, so the theme works the same with DX behind OpenID Connect.
 - DXClient `deploy-theme` is not used: its registration step fails on DX Compose CF239.
 
-### DAMCollection
+### DXDamCollection
 
 - Find the collection by the ID in the status, or by name (so an existing one is adopted), or create it; give
   the User role to anonymous and/or all authenticated users.
@@ -114,13 +117,22 @@ Writes to the status are merge patches, so concurrent passes do not lose what wa
 - `prune: true` deletes the assets that are no longer in the source.
 - Delete (policy Delete): the collection, ignoring media references.
 
-### PostgresDatabase
+### DXDatabase
 
 - A Secret `<name>-db` (or `secretName`) with the connection details; the password is generated once and kept,
   and the Secret is owned by the resource.
-- With the superuser Secret: create or alter the role (login, password), create the database owned by it if
-  missing, create the extensions. Checked every 30 minutes.
-- Delete (policy Delete): `DROP DATABASE ... WITH (FORCE)` and `DROP ROLE`.
+- With the admin Secret, by engine (checked every 30 minutes):
+  - **PostgreSQL**: create or alter the role (login, password), create the database owned by it if missing, create
+    the extensions.
+  - **Oracle** (`oracle.service`, the PDB): the database is a schema: create the user (default tablespace and quota)
+    with the privileges to create tables, views, sequences, procedures, triggers, types and synonyms; an existing user
+    gets the password again.
+  - **SQL Server**: create or alter the login, create the database if missing, its user for the login and the
+    `db_owner` membership.
+- Delete (policy Delete): PostgreSQL `DROP DATABASE ... WITH (FORCE)` and `DROP ROLE`; Oracle `DROP USER ... CASCADE`;
+  SQL Server `DROP DATABASE` (single user first) and `DROP LOGIN`.
+- The Secret has the same keys for every engine: `engine`, `username`, `password`, `host`, `port`, `database`,
+  `uri` and `jdbcUrl` (plus `service` with Oracle).
 
 ### DXConnection
 
@@ -143,7 +155,7 @@ accepted, files present). Changes in its Secrets trigger a new check.
 ## Status and events
 
 ```bash
-kubectl get scriptapplication time-off -o yaml        # status.contentId, history, conditions
+kubectl get dxscriptapplication time-off -o yaml        # status.contentId, history, conditions
 kubectl get events --field-selector involvedObject.name=time-off
 ```
 

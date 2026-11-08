@@ -9,7 +9,7 @@ alguien cambió o borró.**
 
 ```yaml
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: vacaciones
 spec:
@@ -67,11 +67,11 @@ El operador convierte esos pasos en **recursos con un estado deseado y un status
 | Recurso | Qué hace el operador |
 |---|---|
 | **DXConnection** | Comprueba que DX responde y acepta las credenciales (un Secret y, si hace falta, una CA). La comparten los recursos de un namespace; fija cada cuánto se revisa todo contra DX (`resyncInterval`) |
-| **ScriptApplication** | Toma los ficheros compilados de una **imagen OCI** (leída directamente del registro: no se ejecuta nada), de un **ConfigMap** o de una **URL** de un archivo; sustituye los `${NOMBRE}` (valores, ConfigMaps, Secrets, URL de ficheros del DAM); comprueba los límites de WCM; **hace el push** con DXClient solo cuando algo cambió; la restaura si se **borró o editó en DX**; la quita de DX al borrarla si se pide |
+| **DXScriptApplication** | Toma los ficheros compilados de una **imagen OCI** (leída directamente del registro: no se ejecuta nada), de un **ConfigMap** o de una **URL** de un archivo; sustituye los `${NOMBRE}` (valores, ConfigMaps, Secrets, URL de ficheros del DAM); comprueba los límites de WCM; **hace el push** con DXClient solo cuando algo cambió; la restaura si se **borró o editó en DX**; la quita de DX al borrarla si se pide |
 | **DXPage** | Crea la página con sus Script Applications (XMLAccess): títulos por idioma, acceso, tema, posición. Conserva el layout y los ajustes que la gente haga en ella entre actualizaciones; la **vuelve a crear** si se borró en DX |
-| **DAMCollection** | Crea la colección y sube cada fichero de su origen; un fichero cambiado pasa a ser **una versión nueva del mismo asset** (misma URL); restaura los borrados; acceso público o de usuarios autenticados; limpieza opcional |
-| **DXTheme** | Un **tema** propio: copia un tema base del mismo DX (por defecto Portal 8.5) por WebDAV, añade los ficheros de su origen (`css/…`, `images/…`) y HTML en el `<head>` de sus plantillas, y lo registra con XMLAccess. Las páginas lo usan con `spec.theme`; se restaura si se borra su registro o su carpeta en DX |
-| **PostgresDatabase** | Crea la base de datos, su propietario y sus extensiones en un PostgreSQL existente, y escribe un **Secret** para el backend (`uri`, `jdbcUrl`, usuario, contraseña...). La contraseña se genera una vez y se conserva |
+| **DXDamCollection** | Crea la colección y sube cada fichero de su origen; un fichero cambiado pasa a ser **una versión nueva del mismo asset** (misma URL); restaura los borrados; acceso público o de usuarios autenticados; limpieza opcional |
+| **DXTheme** | Un **tema**: sube al almacén WebDAV los ficheros de su origen (un tema propio completo, como el [tema de ejemplo de EUROPESIP](https://github.com/europesip/hcl-dx-theme-sample), o ficheros que se añaden a una copia de un tema del mismo DX), HTML opcional en el `<head>` de sus plantillas, y lo registra con XMLAccess. Las páginas lo usan con `spec.theme`; se restaura si se borra su registro o su carpeta en DX |
+| **DXDatabase** | Crea la base de datos de un backend y su propietario en un **PostgreSQL, Oracle o SQL Server** existente, y escribe un **Secret** para el backend (`uri`, `jdbcUrl`, usuario, contraseña...). La contraseña se genera una vez y se conserva |
 
 Y en todos los recursos: **dependencias** (`dependsOn`: Deployments, StatefulSets, Jobs y los demás recursos; no
 se sube nada hasta que el backend está listo), **política de deriva** (`Restore`, por defecto, o `Report`),
@@ -108,7 +108,7 @@ docker run --rm hclcr.io/dx-public/dxclient:v95_CF239_20261103-1404 /dxclient/bi
 ```
 
 ```bash
-helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.2.1 \
+helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.3.0 \
   -n dxop-system --create-namespace --set dxclient.acceptLicense=true
 ```
 
@@ -143,8 +143,8 @@ spec:
 ```bash
 kubectl -n intranet get dxconnections                  # Ready = ha entrado en DX
 kubectl -n intranet apply -f mi-app.yaml
-kubectl -n intranet get scriptapplications,dxpages,damcollections,postgresdatabases
-kubectl -n intranet get events --field-selector involvedObject.kind=ScriptApplication
+kubectl -n intranet get dxscriptapplications,dxpages,dxdamcollections,dxdatabases
+kubectl -n intranet get events --field-selector involvedObject.kind=DXScriptApplication
 ```
 
 Forzar una reconciliación completa ahora (un push aunque no haya cambios):
@@ -168,7 +168,7 @@ Aplicaciones pequeñas, cada una para un caso. Se aplican en un namespace con lo
 | [06-url](samples/06-url/url.yaml) | Una aplicación desde una URL `.tar.gz` (un tag de GitHub), con su SHA256 |
 | [07-verify](samples/07-verify/verify.yaml) | `mode: Verify`: solo comprueba que la aplicación está en DX (entornos con sindicación) |
 | [08-page](samples/08-page/page.yaml) | Una página con tres aplicaciones, una posición y una política de borrado |
-| [09-theme](samples/09-theme/theme.yaml) | Un tema propio (Portal 8.5 con una cabecera azul) y una página que lo usa |
+| [09-theme](samples/09-theme/theme.yaml) | Un tema propio (el [tema de ejemplo de EUROPESIP](https://github.com/europesip/hcl-dx-theme-sample), desde su release) y una página que lo usa |
 
 ![Los ejemplos 03, 05 y 01 en la página del ejemplo 08](docs/images/showcase.png)
 

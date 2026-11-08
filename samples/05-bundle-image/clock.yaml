@@ -1,7 +1,7 @@
 # 05 · A bundle image with several files in folders (HTML, CSS, JS): the same build for every environment, the
 # differences (city, time zone) in substitutions. Pin the digest in production: ref: ...@sha256:...
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-clock
 spec:

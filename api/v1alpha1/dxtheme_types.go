@@ -22,10 +22,14 @@ type ThemeBase struct {
 	// +kubebuilder:default=ibm.portal.85Theme
 	// +optional
 	UniqueName string `json:"uniqueName,omitempty"`
+	// CopyFiles: true (default) copies the files of the base theme first and puts the source on top; false uploads only
+	// the files of the source (a complete theme of its own), and the base is used only as the model of the registration.
+	// +optional
+	CopyFiles *bool `json:"copyFiles,omitempty"`
 }
 
-// DXThemeSpec is a DX theme (WebDAV based): a copy of a base theme of the same DX, with the files of a source and
-// optional HTML added to the head of its templates, registered with XMLAccess.
+// DXThemeSpec is a DX theme (WebDAV based): the files of a source (a complete theme of its own, or files added to a
+// copy of a base theme of the same DX) and optional HTML added to the head of its templates, registered with XMLAccess.
 type DXThemeSpec struct {
 	// ConnectionRef: the DXConnection to use.
 	ConnectionRef LocalObjectReference `json:"connectionRef"`
@@ -48,6 +52,14 @@ type DXThemeSpec struct {
 	// css/my.css or images/logo.png). Optional.
 	// +optional
 	Source *Source `json:"source,omitempty"`
+	// Profile: resource aggregation profile of the theme, relative to its folder (for example
+	// profiles/profile_europesip.json). Default: the one of the base theme.
+	// +optional
+	Profile string `json:"profile,omitempty"`
+	// Layout: default layout template of the theme, relative to its folder (for example layout-templates/1Column).
+	// Default: the one of the base theme, in the new folder.
+	// +optional
+	Layout string `json:"layout,omitempty"`
 	// HeadHTML: HTML inserted before </head> in every theme template (theme.html, theme_sidenav.html and their language
 	// versions): a <style>, a <link> to a file of the source (/wps/mycontenthandler/dav/fs-type1/themes/<folder>/...),
 	// a <script>...

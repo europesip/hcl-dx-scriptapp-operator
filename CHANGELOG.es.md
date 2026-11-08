@@ -3,9 +3,35 @@
 [English](CHANGELOG.md) · **Español**
 
 Para volver a una versión anterior: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <versión> --reuse-values`
-(los CRDs son compatibles: la 0.2.1 solo añade DXTheme).
+(la 0.3.0 renombró los recursos: mira sus notas).
 
-## 0.2.1 · 2026-11-08 · Temas
+## 0.3.0 · 2026-11-08 · Prefijo DX, DXDatabase para cualquier motor, temas propios
+
+**Cambio incompatible: los recursos se han renombrado** para que todos lleven el prefijo DX:
+
+| Antes | Ahora | Nombre corto |
+|---|---|---|
+| `ScriptApplication` | `DXScriptApplication` | `dxapp`, `dxsa` |
+| `DAMCollection` | `DXDamCollection` | `dxdam` |
+| `PostgresDatabase` | `DXDatabase` (`superuserSecret` → `adminSecret`) | `dxdb` |
+
+`DXConnection`, `DXPage` y `DXTheme` mantienen su nombre. **Migrar desde la 0.2:** aplica los CRDs de la 0.3.0, cambia el
+`kind` de tus recursos (y `superuserSecret` / `superuserSecretNamespace` → `adminSecret` / `adminSecretNamespace`) y
+vuelve a aplicarlos: el operador encuentra el contenido existente en DX por su nombre (nombre en WCM, nombre de la
+colección, base de datos) y lo adopta. Después borra los recursos antiguos (sus finalizers solo los quita un operador
+que los conozca: con la 0.3.0 en marcha, quítalos con `kubectl patch ... --type merge -p '{"metadata":{"finalizers":null}}'`;
+no se borra nada en DX) y los CRDs antiguos.
+
+- **DXDatabase**: PostgreSQL, **Oracle** (`oracle.service`; la base de datos es un esquema) y **SQL Server**
+  (`sqlServer.encrypt`, `trustServerCertificate`), con `engine`. El mismo Secret con cualquier motor (`engine`,
+  `username`, `password`, `host`, `port`, `database`, `uri`, `jdbcUrl`). Probado con PostgreSQL 17, Oracle Database 23ai
+  Free y SQL Server 2022: crear, entrar como propietario, volver a reconciliar y borrar. DB2 aún no está soportado (su
+  driver de Go necesita cgo).
+- **DXTheme**: `base.copyFiles: false` sube solo los ficheros del origen (un tema propio, sin copiar nada de los temas de
+  HCL); `profile` y `layout` fijan el perfil de agregación de recursos y el layout por defecto. El ejemplo 09 instala
+  ahora el [tema de ejemplo de EUROPESIP](https://github.com/europesip/hcl-dx-theme-sample) desde su release.
+
+ 2026-11-08 · Temas
 
 (La 0.2.0 se etiquetó pero nunca se publicó: su CI falló por la cabecera de un fichero generado.)
 

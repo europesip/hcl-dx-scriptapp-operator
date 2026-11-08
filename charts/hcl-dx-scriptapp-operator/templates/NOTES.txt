@@ -3,6 +3,6 @@ The HCL DX Script Application operator is running in {{ .Release.Namespace }}.
 Next, in the namespace of your applications:
   1. A Secret with a DX user (and one with the CA if the DX certificate is self-signed)
   2. A DXConnection          kubectl get dxconnections     (Ready = signed in to DX)
-  3. Your ScriptApplications, DXPages, DAMCollections and PostgresDatabases
+  3. Your DXScriptApplications, DXPages, DXDamCollections and DXDatabases
 
 Samples and documentation: https://github.com/europesip/hcl-dx-scriptapp-operator

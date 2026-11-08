@@ -1,15 +1,18 @@
 # 04 · A Script Application with its own backend and database. The operator creates the database and its owner
-# in an existing PostgreSQL (and a Secret with the connection details for the backend), and only pushes the
-# Script Application when the backend is available (dependsOn). The backend is published on the DX host
+# in an existing database server (PostgreSQL here; engine: Oracle or SQLServer work the same) and a Secret with the
+# connection details for the backend, and only pushes the Script Application when the backend is available (dependsOn).
+# Prefer that your DBA keeps the credentials? Skip the DXDatabase and give the backend the Secret they provide (for
+# example an ExternalSecret from your vault). The backend is published on the DX host
 # (same origin: the browser sends the DX session, no CORS).
 apiVersion: dx.europesip.com/v1alpha1
-kind: PostgresDatabase
+kind: DXDatabase
 metadata:
   name: dxop-visits
 spec:
-  host: dx-pg-rw.dx-shared.svc.cluster.local     # your PostgreSQL server
-  superuserSecret: { name: dx-pg-superuser }      # a user that can create roles and databases
-  superuserSecretNamespace: dx-shared
+  engine: PostgreSQL                              # PostgreSQL (default), Oracle or SQLServer
+  host: dx-pg-rw.dx-shared.svc.cluster.local     # your database server
+  adminSecret: { name: dx-pg-superuser }          # an administrator that can create users and databases
+  adminSecretNamespace: dx-shared
   database: dxop_visits
   secretName: dxop-visits-db                      # written by the operator: username, password, uri, jdbcUrl...
 ---
@@ -97,7 +100,7 @@ data:
     })();
 ---
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-visits
 spec:

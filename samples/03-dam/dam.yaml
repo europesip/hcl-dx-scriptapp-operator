@@ -1,4 +1,4 @@
-# 03 · Files in the DAM and their URL in a Script Application. The DAMCollection uploads every file of its
+# 03 · Files in the DAM and their URL in a Script Application. The DXDamCollection uploads every file of its
 # source as an asset (a changed file becomes a new version: same URL). The application gets the URL of the
 # logo through a substitution, and the operator waits for the collection before pushing it.
 apiVersion: v1
@@ -9,7 +9,7 @@ binaryData:
   logo.png: iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAIAAABt+uBvAAAAmklEQVR42u3ZoQ0AMAgAQXSnYqDub2EDBElNc8lPcPYjsjSFABAgQIAAAQIESIAAAQIECBAgQAIECBAgQIAAARIgQIAAAQIECBAgAVpV52oIECBAgAABAgQIkAABAgQIECBAgAQIECBAgAD9AWQNOquAAAECBAgQIAECBAgQIECAAAkQIECAAAECBEiAAAECBAgQIECABAjQgxqPIcSzRm6MOQAAAABJRU5ErkJggg==
 ---
 apiVersion: dx.europesip.com/v1alpha1
-kind: DAMCollection
+kind: DXDamCollection
 metadata:
   name: dxop-brand
 spec:
@@ -43,7 +43,7 @@ data:
     </html>
 ---
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-brand
 spec:

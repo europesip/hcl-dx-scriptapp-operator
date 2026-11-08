@@ -61,8 +61,11 @@
 
 - **Solo temas WebDAV** (los ficheros del tema en `dav:fs-type1/themes/`). No se soportan temas empaquetados como
   WAR/EAR.
-- **Una copia de un tema del mismo DX**: el tema base (por defecto Portal 8.5) tiene que existir en ese DX. El tema
+- **El registro toma como modelo un tema del mismo DX** (el base, por defecto Portal 8.5: skins y ajustes), así que el
+  base tiene que existir en ese DX. Con `base.copyFiles: true` (por defecto) también se copian sus ficheros, y el tema
   no sigue los cambios posteriores del base: fuerza una reconciliación (o cambia el recurso) para copiarlo otra vez.
+  Un tema propio (`base.copyFiles: false`) necesita un origen con todos los ficheros del tema: mira el
+  [tema de ejemplo de EUROPESIP](https://github.com/europesip/hcl-dx-theme-sample).
 - **La carpeta y el nombre único son la clave**: cambiarlos crea un segundo tema; el anterior se queda en DX (salvo
   con la política Delete).
 - **Aplicar un cambio sube la carpeta entera** (unos 430 ficheros con Portal 8.5, uno o dos minutos).
@@ -70,11 +73,16 @@
 - **Las páginas** eligen el tema con `spec.theme` (su nombre único); para los layouts del tema nuevo, apunta
   `layoutTemplate` a `dav:fs-type1/themes/<carpeta>/layout-templates/...`.
 
-## PostgresDatabase
+## DXDatabase
 
-- Un servidor PostgreSQL existente y un Secret de superusuario que el operador pueda leer (puede estar en otro
-  namespace con `superuserSecretNamespace`).
-- Los nombres de la base de datos y del propietario deben ser identificadores de PostgreSQL en minúsculas.
+- Motores: **PostgreSQL, Oracle y SQL Server** (probados con PostgreSQL 17 / CloudNativePG, Oracle Database 23ai Free
+  y SQL Server 2022). **DB2 aún no está soportado**: su driver de Go necesita la librería nativa del cliente de IBM
+  (cgo), que la imagen estática del operador no incluye.
+- Un servidor existente y un Secret de administrador que el operador pueda leer (puede estar en otro namespace con
+  `adminSecretNamespace`). El operador genera la contraseña del propietario; si tu DBA debe custodiar las credenciales,
+  no uses DXDatabase y da al backend el Secret que te facilite (por ejemplo, un ExternalSecret de tu gestor).
+- Nombres: PostgreSQL, identificadores en minúsculas; Oracle, un esquema en minúsculas de hasta 30 caracteres (el
+  usuario se crea en mayúsculas); SQL Server, letras, dígitos y `_`.
 - El operador no migra esquemas: eso corresponde al backend (Flyway, Liquibase o su propio arranque).
 
 ## Operador

@@ -58,8 +58,11 @@
 
 - **WebDAV themes only** (the theme files in `dav:fs-type1/themes/`). Themes packaged as a WAR/EAR are not
   supported.
-- **A copy of a theme of the same DX**: the base (default Portal 8.5) must exist in that DX. The theme does not
-  follow later changes of the base: force a reconciliation (or change the resource) to copy it again.
+- **The registration is modelled on a theme of the same DX** (the base, default Portal 8.5: skins and settings), so the
+  base must exist in that DX. With `base.copyFiles: true` (the default) its files are copied too, and the theme does not
+  follow later changes of the base: force a reconciliation (or change the resource) to copy it again. A theme of its
+  own (`base.copyFiles: false`) needs a source with every file of the theme: see the
+  [EUROPESIP sample theme](https://github.com/europesip/hcl-dx-theme-sample).
 - **The folder and the unique name are the keys**: renaming them creates a second theme; the old one stays in DX
   (unless the policy is Delete).
 - **Applying a change uploads the whole folder** (about 430 files for Portal 8.5, a minute or two).
@@ -67,11 +70,16 @@
 - **Pages** pick the theme with `spec.theme` (its unique name); for the layouts of the new theme, point
   `layoutTemplate` at `dav:fs-type1/themes/<folder>/layout-templates/...`.
 
-## PostgresDatabase
+## DXDatabase
 
-- An existing PostgreSQL server and a superuser Secret readable by the operator (it may be in another namespace
-  with `superuserSecretNamespace`).
-- Database and owner names must be lower-case PostgreSQL identifiers.
+- Engines: **PostgreSQL, Oracle and SQL Server** (tested with PostgreSQL 17 / CloudNativePG, Oracle Database 23ai Free
+  and SQL Server 2022). **DB2 is not supported yet**: its Go driver needs the native IBM client library (cgo), which
+  the static image of the operator does not include.
+- An existing server and an admin Secret readable by the operator (it may be in another namespace with
+  `adminSecretNamespace`). The operator generates the password of the owner; if your DBA must keep the credentials,
+  skip the DXDatabase and give the backend the Secret they provide (for example an ExternalSecret from your vault).
+- Names: PostgreSQL lower-case identifiers; Oracle a lower-case schema name of up to 30 characters (the user is
+  created in upper case); SQL Server letters, digits and `_`.
 - The operator does not migrate schemas: that belongs to the backend (Flyway, Liquibase, its own start-up).
 
 ## Operator

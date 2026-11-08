@@ -24,21 +24,21 @@ import (
 	"github.com/europesip/hcl-dx-scriptapp-operator/internal/source"
 )
 
-// ScriptApplicationReconciler keeps Script Applications in DX as their resources declare.
-type ScriptApplicationReconciler struct {
+// DXScriptApplicationReconciler keeps Script Applications in DX as their resources declare.
+type DXScriptApplicationReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 	*Shared
 }
 
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=scriptapplications,verbs=get;list;watch;update;patch
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=scriptapplications/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=dx.europesip.com,resources=scriptapplications/finalizers,verbs=update
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxscriptapplications,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxscriptapplications/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=dx.europesip.com,resources=dxscriptapplications/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments;statefulsets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch
 
 // wcmDefaults fills the WCM settings that have defaults.
-func wcmDefaults(sa *dxv1.ScriptApplication) dxv1.WCMSettings {
+func wcmDefaults(sa *dxv1.DXScriptApplication) dxv1.WCMSettings {
 	w := sa.Spec.WCM
 	if w.Name == "" {
 		w.Name = sa.Name
@@ -56,9 +56,9 @@ func wcmDefaults(sa *dxv1.ScriptApplication) dxv1.WCMSettings {
 }
 
 // Reconcile pushes the application when it changed, checks it in DX on every resync and corrects drift.
-func (r *ScriptApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *DXScriptApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
-	var sa dxv1.ScriptApplication
+	var sa dxv1.DXScriptApplication
 	if err := r.Get(ctx, req.NamespacedName, &sa); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -102,7 +102,7 @@ func (r *ScriptApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	return res, err
 }
 
-func (r *ScriptApplicationReconciler) reconcile(ctx context.Context, sa *dxv1.ScriptApplication) (ctrl.Result, error) {
+func (r *DXScriptApplicationReconciler) reconcile(ctx context.Context, sa *dxv1.DXScriptApplication) (ctrl.Result, error) {
 	gen := sa.Generation
 	fail := func(reason string, err error, after time.Duration) (ctrl.Result, error) {
 		setCondition(&sa.Status.Conditions, gen, dxv1.ConditionReady, false, reason, err.Error())
@@ -116,7 +116,7 @@ func (r *ScriptApplicationReconciler) reconcile(ctx context.Context, sa *dxv1.Sc
 	deps := append([]dxv1.Dependency{}, sa.Spec.DependsOn...)
 	for _, s := range sa.Spec.Substitutions {
 		if s.ValueFrom != nil && s.ValueFrom.DAMAsset != nil {
-			deps = append(deps, dxv1.Dependency{Kind: "DAMCollection", Name: s.ValueFrom.DAMAsset.Collection})
+			deps = append(deps, dxv1.Dependency{Kind: "DXDamCollection", Name: s.ValueFrom.DAMAsset.Collection})
 		}
 	}
 	if err := Dependencies(ctx, r.Client, sa.Namespace, deps); err != nil {
@@ -234,7 +234,7 @@ func (r *ScriptApplicationReconciler) reconcile(ctx context.Context, sa *dxv1.Sc
 }
 
 // substitutions resolves the values of the ${NAME} placeholders.
-func (r *ScriptApplicationReconciler) substitutions(ctx context.Context, sa *dxv1.ScriptApplication) (map[string]string, error) {
+func (r *DXScriptApplicationReconciler) substitutions(ctx context.Context, sa *dxv1.DXScriptApplication) (map[string]string, error) {
 	out := map[string]string{}
 	for _, s := range sa.Spec.Substitutions {
 		v := s.Value
@@ -260,9 +260,9 @@ func (r *ScriptApplicationReconciler) substitutions(ctx context.Context, sa *dxv
 				}
 				v = string(b)
 			case f.DAMAsset != nil:
-				var col dxv1.DAMCollection
+				var col dxv1.DXDamCollection
 				if err := r.Get(ctx, client.ObjectKey{Namespace: sa.Namespace, Name: f.DAMAsset.Collection}, &col); err != nil {
-					return nil, notReady("substitution %s: DAMCollection %s: %v", s.Name, f.DAMAsset.Collection, err)
+					return nil, notReady("substitution %s: DXDamCollection %s: %v", s.Name, f.DAMAsset.Collection, err)
 				}
 				found := false
 				for _, a := range col.Status.Assets {
@@ -271,7 +271,7 @@ func (r *ScriptApplicationReconciler) substitutions(ctx context.Context, sa *dxv
 					}
 				}
 				if !found {
-					return nil, notReady("substitution %s: the DAMCollection %s has no asset %q yet", s.Name, col.Name, f.DAMAsset.Asset)
+					return nil, notReady("substitution %s: the DXDamCollection %s has no asset %q yet", s.Name, col.Name, f.DAMAsset.Asset)
 				}
 			}
 		}
@@ -280,8 +280,8 @@ func (r *ScriptApplicationReconciler) substitutions(ctx context.Context, sa *dxv
 	return out, nil
 }
 
-// references of a ScriptApplication, for the watches.
-func scriptAppRefs(list *dxv1.ScriptApplicationList) map[client.ObjectKey][]refersTo {
+// references of a DXScriptApplication, for the watches.
+func scriptAppRefs(list *dxv1.DXScriptApplicationList) map[client.ObjectKey][]refersTo {
 	out := map[client.ObjectKey][]refersTo{}
 	for i := range list.Items {
 		sa := &list.Items[i]
@@ -298,7 +298,7 @@ func scriptAppRefs(list *dxv1.ScriptApplicationList) map[client.ObjectKey][]refe
 					rs = append(rs, refersTo{"Secret", f.SecretKeyRef.Name})
 				}
 				if f.DAMAsset != nil {
-					rs = append(rs, refersTo{"DAMCollection", f.DAMAsset.Collection})
+					rs = append(rs, refersTo{"DXDamCollection", f.DAMAsset.Collection})
 				}
 			}
 		}
@@ -312,21 +312,21 @@ func scriptAppRefs(list *dxv1.ScriptApplicationList) map[client.ObjectKey][]refe
 }
 
 // SetupWithManager sets up the controller: it reacts to its resources and to every object they refer to.
-func (r *ScriptApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	newList := func() *dxv1.ScriptApplicationList { return &dxv1.ScriptApplicationList{} }
+func (r *DXScriptApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	newList := func() *dxv1.DXScriptApplicationList { return &dxv1.DXScriptApplicationList{} }
 	m := func(kind string) handler.EventHandler {
 		return handler.EnqueueRequestsFromMapFunc(mapReferrers(r.Client, newList, scriptAppRefs, kind))
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&dxv1.ScriptApplication{}, builder.WithPredicates(predicate.Or(predicate.GenerationChangedPredicate{}, predicate.AnnotationChangedPredicate{}))).
+		For(&dxv1.DXScriptApplication{}, builder.WithPredicates(predicate.Or(predicate.GenerationChangedPredicate{}, predicate.AnnotationChangedPredicate{}))).
 		Watches(&corev1.ConfigMap{}, m("ConfigMap")).
 		Watches(&corev1.Secret{}, m("Secret")).
 		Watches(&dxv1.DXConnection{}, m("DXConnection")).
-		Watches(&dxv1.DAMCollection{}, m("DAMCollection")).
-		Watches(&dxv1.PostgresDatabase{}, m("PostgresDatabase")).
+		Watches(&dxv1.DXDamCollection{}, m("DXDamCollection")).
+		Watches(&dxv1.DXDatabase{}, m("DXDatabase")).
 		Watches(&appsv1.Deployment{}, m("Deployment")).
 		Watches(&appsv1.StatefulSet{}, m("StatefulSet")).
 		Watches(&batchv1.Job{}, m("Job")).
-		Named("scriptapplication").
+		Named("dxscriptapplication").
 		Complete(r)
 }

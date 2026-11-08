@@ -11,8 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// DAMCollectionSpec is a collection of the DX Digital Asset Management with the files of a source.
-type DAMCollectionSpec struct {
+// DXDamCollectionSpec is a collection of the DX Digital Asset Management with the files of a source.
+type DXDamCollectionSpec struct {
 	// ConnectionRef: the DXConnection to use.
 	ConnectionRef LocalObjectReference `json:"connectionRef"`
 	// CollectionName in the DAM (default: the name of the resource). The key that finds the same collection.
@@ -59,8 +59,8 @@ type DAMAssetStatus struct {
 	SHA256 string `json:"sha256"`
 }
 
-// DAMCollectionStatus is what the operator knows about the collection.
-type DAMCollectionStatus struct {
+// DXDamCollectionStatus is what the operator knows about the collection.
+type DXDamCollectionStatus struct {
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// CollectionID in the DAM.
@@ -82,32 +82,32 @@ type DAMCollectionStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=dam
+// +kubebuilder:resource:shortName=dxdam
 // +kubebuilder:printcolumn:name="Collection",type=string,JSONPath=`.spec.collectionName`
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Reason",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].reason`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
-// DAMCollection is a collection of the HCL DX Digital Asset Management, kept as the resource declares.
-type DAMCollection struct {
+// DXDamCollection is a collection of the HCL DX Digital Asset Management, kept as the resource declares.
+type DXDamCollection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitzero"`
-	Spec              DAMCollectionSpec   `json:"spec"`
-	Status            DAMCollectionStatus `json:"status,omitzero"`
+	Spec              DXDamCollectionSpec   `json:"spec"`
+	Status            DXDamCollectionStatus `json:"status,omitzero"`
 }
 
 // +kubebuilder:object:root=true
 
-// DAMCollectionList contains a list of DAMCollection.
-type DAMCollectionList struct {
+// DXDamCollectionList contains a list of DXDamCollection.
+type DXDamCollectionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitzero"`
-	Items           []DAMCollection `json:"items"`
+	Items           []DXDamCollection `json:"items"`
 }
 
 func init() {
 	SchemeBuilder.Register(func(s *runtime.Scheme) error {
-		s.AddKnownTypes(SchemeGroupVersion, &DAMCollection{}, &DAMCollectionList{})
+		s.AddKnownTypes(SchemeGroupVersion, &DXDamCollection{}, &DXDamCollectionList{})
 		return nil
 	})
 }

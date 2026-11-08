@@ -33,6 +33,8 @@ type ThemeRegistration struct {
 	Titles         map[string]string // locale -> title (only these locales are kept)
 	Description    string
 	Hash           string // kept as the theme parameter dxop.hash
+	Profile        string // optional: resourceaggregation.profile (for example profiles/profile_europesip.json)
+	Layout         string // optional: default layout template, relative to the theme folder (layout-templates/1Column)
 }
 
 func (c *Client) davBase() string {
@@ -345,6 +347,12 @@ func ThemeRegisterXML(baseExport string, r ThemeRegistration) (string, error) {
 		}
 		return ""
 	})
+	if r.Profile != "" {
+		req = setParam(req, "resourceaggregation.profile", r.Profile)
+	}
+	if r.Layout != "" {
+		req = setParam(req, "com.ibm.portal.layout.template.href", "dav:fs-type1/themes/"+strings.TrimSuffix(r.Folder, "/")+"/"+strings.Trim(r.Layout, "/")+"/")
+	}
 	// dxop.hash: with the other parameters (the schema wants them after the localedata elements)
 	if i := strings.Index(req, "<parameter "); i >= 0 {
 		req = req[:i] + param(HashParameter, r.Hash) + "\n            " + req[i:]
@@ -357,6 +365,18 @@ func ThemeRegisterXML(baseExport string, r ThemeRegistration) (string, error) {
 	req = strings.Replace(req, `type="update" create-oids="true" create-oids="true"`, `type="update" create-oids="true"`, 1)
 	req = regexp.MustCompile(`<theme ([^>]*)action="export"`).ReplaceAllString(req, `<theme ${1}action="update"`)
 	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + req, nil
+}
+
+// setParam sets the value of a theme parameter of an export, adding the parameter if it is missing.
+func setParam(req, name, value string) string {
+	re := regexp.MustCompile(`(<parameter name="` + regexp.QuoteMeta(name) + `"[^>]*><!\[CDATA\[)[^\]]*(\]\]></parameter>)`)
+	if re.MatchString(req) {
+		return re.ReplaceAllString(req, "${1}"+strings.ReplaceAll(value, "$", "$$")+"${2}")
+	}
+	if i := strings.Index(req, "<parameter "); i >= 0 {
+		return req[:i] + param(name, value) + "\n            " + req[i:]
+	}
+	return strings.Replace(req, "</theme>", param(name, value)+"\n    </theme>", 1)
 }
 
 // AddToHead inserts html before </head> in the theme templates (theme.html, theme_sidenav.html and their language

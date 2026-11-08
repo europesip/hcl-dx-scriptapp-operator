@@ -16,7 +16,7 @@ rules:
 - apiGroups:
   - dx.europesip.com
   resources:
-  - scriptapplications
+  - dxscriptapplications
   verbs:
   - create
   - delete
@@ -28,6 +28,6 @@ rules:
 - apiGroups:
   - dx.europesip.com
   resources:
-  - scriptapplications/status
+  - dxscriptapplications/status
   verbs:
   - get

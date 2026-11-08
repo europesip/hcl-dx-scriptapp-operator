@@ -31,7 +31,7 @@ DXConnection (10 minutos por defecto). En cada pasada:
 
 Las escrituras en el status son merge patches, así que dos pasadas simultáneas no pierden lo hecho en DX.
 
-### ScriptApplication
+### DXScriptApplication
 
 - **Preparar**: obtener el origen; copiarlo a una carpeta de trabajo; sustituir los `${NOMBRE}` de
   `substitutions` en los ficheros de texto (`.html .htm .js .mjs .css .json .txt .svg .xml`; los demás `${...}`
@@ -74,20 +74,23 @@ Las escrituras en el status son merge patches, así que dos pasadas simultáneas
 
 ### DXTheme
 
-- **Deseado**: el spec (carpeta, nombre único, títulos, base, HTML de cabecera) y la revisión de su origen, como un hash.
+- **Deseado**: el spec (carpeta, nombre único, títulos, base, perfil, layout, HTML de cabecera) y la revisión de su
+  origen, como un hash.
 - **Real**: un export de XMLAccess del tema por nombre único (el hash aplicado se guarda en el tema, en el parámetro
   `dxop.hash`) y un listado WebDAV de su carpeta (`dav:fs-type1/themes/<carpeta>/`).
-- **Aplicar**: descargar todos los ficheros del tema base por WebDAV, poner encima los del origen (mismas rutas),
+- **Aplicar**: con `base.copyFiles: false` (un tema propio) solo los ficheros del origen; si no, descargar antes todos
+  los ficheros del tema base por WebDAV y poner encima los del origen (mismas rutas); después
   insertar el HTML de cabecera antes de `</head>` en `theme.html`, `theme_sidenav.html` y sus versiones por idioma,
   subir la carpeta (MKCOL + PUT) y registrar el tema con una copia del registro del tema base (nombre único nuevo,
-  plantillas apuntando a la carpeta nueva, `default="false"`, solo los títulos declarados).
+  plantillas apuntando a la carpeta nueva, `default="false"`, solo los títulos declarados, y `profile` / `layout` si
+  se indican).
 - **Deriva**: falta el registro o la carpeta en DX → subirlo y registrarlo otra vez (`Restore`) o avisar.
 - **Borrar** (política Delete): borrar el registro (XMLAccess) y la carpeta (WebDAV). Las páginas que lo usan pasan
   al tema por defecto.
 - WebDAV y XMLAccess usan autenticación básica: el tema funciona igual con DX detrás de OpenID Connect.
 - No se usa `deploy-theme` de DXClient: su paso de registro falla en DX Compose CF239.
 
-### DAMCollection
+### DXDamCollection
 
 - Buscar la colección por el ID del status, o por nombre (así se adopta una existente), o crearla; dar el rol User
   a los anónimos y/o a todos los usuarios autenticados.
@@ -98,13 +101,22 @@ Las escrituras en el status son merge patches, así que dos pasadas simultáneas
 - `prune: true` borra los assets que ya no están en el origen.
 - Borrar (política Delete): la colección, ignorando las referencias.
 
-### PostgresDatabase
+### DXDatabase
 
 - Un Secret `<nombre>-db` (o `secretName`) con los datos de conexión; la contraseña se genera una vez y se
   conserva, y el Secret pertenece al recurso.
-- Con el Secret del superusuario: crear o modificar el rol (login, contraseña), crear la base de datos con ese
-  propietario si falta y crear las extensiones. Se revisa cada 30 minutos.
-- Borrar (política Delete): `DROP DATABASE ... WITH (FORCE)` y `DROP ROLE`.
+- Con el Secret del administrador, según el motor (se revisa cada 30 minutos):
+  - **PostgreSQL**: crear o modificar el rol (login, contraseña), crear la base de datos con ese propietario si falta
+    y crear las extensiones.
+  - **Oracle** (`oracle.service`, la PDB): la base de datos es un esquema: crear el usuario (tablespace por defecto y
+    cuota) con permisos para crear tablas, vistas, secuencias, procedimientos, triggers, tipos y sinónimos; a un
+    usuario existente se le vuelve a poner la contraseña.
+  - **SQL Server**: crear o modificar el login, crear la base de datos si falta, su usuario para ese login y la
+    pertenencia a `db_owner`.
+- Borrar (política Delete): PostgreSQL `DROP DATABASE ... WITH (FORCE)` y `DROP ROLE`; Oracle `DROP USER ... CASCADE`;
+  SQL Server `DROP DATABASE` (antes en modo de un solo usuario) y `DROP LOGIN`.
+- El Secret tiene las mismas claves con cualquier motor: `engine`, `username`, `password`, `host`, `port`, `database`,
+  `uri` y `jdbcUrl` (y `service` con Oracle).
 
 ### DXConnection
 
@@ -129,7 +141,7 @@ Inicia sesión en DX con una sesión nueva (`/dx/api/core/v1/auth/login`) y comp
 ## Status y eventos
 
 ```bash
-kubectl get scriptapplication vacaciones -o yaml        # status.contentId, history, conditions
+kubectl get dxscriptapplication vacaciones -o yaml        # status.contentId, history, conditions
 kubectl get events --field-selector involvedObject.name=vacaciones
 ```
 

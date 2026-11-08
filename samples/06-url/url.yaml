@@ -2,7 +2,7 @@
 # Here, a folder of the archive of a tag of this repository. With sha256, the download is checked and only done
 # again when the value changes.
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-url
 spec:

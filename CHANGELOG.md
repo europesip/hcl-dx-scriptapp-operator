@@ -3,9 +3,34 @@
 **English** · [Español](CHANGELOG.es.md)
 
 To go back to an earlier release: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <version> --reuse-values`
-(the CRDs are compatible: 0.2.1 only adds DXTheme).
+(0.3.0 renamed the resources: see its notes).
 
-## 0.2.1 · 2026-11-08 · Themes
+## 0.3.0 · 2026-11-08 · DX prefix, DXDatabase for every engine, themes of their own
+
+**Breaking: the resources were renamed** so that every one has the DX prefix:
+
+| Before | Now | Short name |
+|---|---|---|
+| `ScriptApplication` | `DXScriptApplication` | `dxapp`, `dxsa` |
+| `DAMCollection` | `DXDamCollection` | `dxdam` |
+| `PostgresDatabase` | `DXDatabase` (`superuserSecret` → `adminSecret`) | `dxdb` |
+
+`DXConnection`, `DXPage` and `DXTheme` keep their names. **Migrating from 0.2:** apply the CRDs of 0.3.0, change the
+`kind` of your resources (and `superuserSecret` / `superuserSecretNamespace` → `adminSecret` / `adminSecretNamespace`)
+and apply them again: the operator finds the existing content in DX by its name (WCM name, collection name, database)
+and adopts it. Then delete the old resources (their finalizers are only removed by an operator that knows them: with
+0.3.0 running, patch them out with `kubectl patch ... --type merge -p '{"metadata":{"finalizers":null}}'`; nothing is
+removed from DX) and the old CRDs.
+
+- **DXDatabase**: PostgreSQL, **Oracle** (`oracle.service`; the database is a schema) and **SQL Server**
+  (`sqlServer.encrypt`, `trustServerCertificate`), with `engine`. Same Secret for every engine (`engine`, `username`,
+  `password`, `host`, `port`, `database`, `uri`, `jdbcUrl`). Tested with PostgreSQL 17, Oracle Database 23ai Free and SQL
+  Server 2022: create, sign in as the owner, reconcile again, delete. DB2 is not supported yet (its Go driver needs cgo).
+- **DXTheme**: `base.copyFiles: false` uploads only the files of the source (a theme of its own, nothing copied from the
+  themes of HCL); `profile` and `layout` set the resource aggregation profile and the default layout. Sample 09 now
+  installs the [EUROPESIP sample theme](https://github.com/europesip/hcl-dx-theme-sample) from its release.
+
+ 2026-11-08 · Themes
 
 (0.2.0 was tagged but never published: its CI failed on a generated file header.)
 

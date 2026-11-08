@@ -2,7 +2,7 @@
 #   Ready=True -> Healthy · Waiting / not reconciled yet -> Progressing · Ready=False -> Degraded · suspended -> Suspended
 # Apply it as a patch of argocd-cm:  kubectl -n argocd patch configmap argocd-cm --patch-file health.yaml
 data:
-  resource.customizations.health.dx.europesip.com_ScriptApplication: &health |
+  resource.customizations.health.dx.europesip.com_DXScriptApplication: &health |
     hs = { status = "Progressing", message = "Waiting for the operator" }
     if obj.metadata.generation ~= nil and obj.status ~= nil and obj.status.observedGeneration ~= nil
        and obj.status.observedGeneration < obj.metadata.generation then
@@ -21,7 +21,7 @@ data:
     end
     return hs
   resource.customizations.health.dx.europesip.com_DXPage: *health
-  resource.customizations.health.dx.europesip.com_DAMCollection: *health
-  resource.customizations.health.dx.europesip.com_PostgresDatabase: *health
+  resource.customizations.health.dx.europesip.com_DXDamCollection: *health
+  resource.customizations.health.dx.europesip.com_DXDatabase: *health
   resource.customizations.health.dx.europesip.com_DXConnection: *health
   resource.customizations.health.dx.europesip.com_DXTheme: *health

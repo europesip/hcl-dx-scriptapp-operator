@@ -25,7 +25,7 @@ data:
     </html>
 ---
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-hello
 spec:

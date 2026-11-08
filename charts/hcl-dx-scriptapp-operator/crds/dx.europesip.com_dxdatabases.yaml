@@ -4,19 +4,22 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-  name: postgresdatabases.dx.europesip.com
+  name: dxdatabases.dx.europesip.com
 spec:
   group: dx.europesip.com
   names:
-    kind: PostgresDatabase
-    listKind: PostgresDatabaseList
-    plural: postgresdatabases
+    kind: DXDatabase
+    listKind: DXDatabaseList
+    plural: dxdatabases
     shortNames:
-    - pgdb
-    singular: postgresdatabase
+    - dxdb
+    singular: dxdatabase
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.engine
+      name: Engine
+      type: string
     - jsonPath: .spec.host
       name: Host
       type: string
@@ -32,8 +35,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PostgresDatabase is a database for the backend of an application,
-          created and kept by the operator.
+        description: |-
+          DXDatabase is a database for the backend of an application (PostgreSQL, Oracle or SQL Server), created and kept by
+          the operator.
         properties:
           apiVersion:
             description: |-
@@ -54,61 +58,15 @@ spec:
             type: object
           spec:
             description: |-
-              PostgresDatabaseSpec is a database and its owner in an existing PostgreSQL server, for the backend of an
-              application.
+              DXDatabaseSpec is a database (and the user that owns it) in an existing database server, for the backend of an
+              application. The operator creates them and writes a Secret with the connection details; the password is generated
+              once and kept.
             properties:
-              database:
-                description: 'Database name (default: the name of the resource, with
-                  "-" replaced by "_").'
-                type: string
-              deletionPolicy:
-                default: Retain
+              adminSecret:
                 description: |-
-                  DeletionPolicy: Retain (default) keeps the database and the role when the resource is deleted; Delete
-                  drops them (the data is lost).
-                enum:
-                - Retain
-                - Delete
-                type: string
-              extensions:
-                description: Extensions to create in the database, for example [pgcrypto,
-                  vector].
-                items:
-                  type: string
-                type: array
-              host:
-                description: Host of the PostgreSQL server, for example dx-pg-rw.dx-shared.svc.cluster.local.
-                minLength: 1
-                type: string
-              owner:
-                description: 'Owner: role that owns the database (default: the database
-                  name).'
-                type: string
-              port:
-                default: 5432
-                description: Port (default 5432).
-                format: int32
-                type: integer
-              secretName:
-                description: |-
-                  SecretName: Secret the operator writes for the backend, with username, password, host, port, database,
-                  uri (postgresql://...) and jdbcUrl. The password is generated once and kept. Default: <name>-db.
-                type: string
-              sslMode:
-                default: prefer
-                description: 'SSLMode: disable, prefer (default), require, verify-ca
-                  or verify-full.'
-                enum:
-                - disable
-                - prefer
-                - require
-                - verify-ca
-                - verify-full
-                type: string
-              superuserSecret:
-                description: |-
-                  SuperuserSecret: Secret with "username" and "password" of a user that can create roles and databases.
-                  It may be in another namespace only if the operator is allowed to read it there (superuserSecretNamespace).
+                  AdminSecret: Secret with "username" and "password" of an administrator that can create users and databases
+                  (PostgreSQL: a superuser or CREATEROLE + CREATEDB; Oracle: CREATE USER and GRANT; SQL Server: sysadmin or
+                  dbcreator + securityadmin). In another namespace only if the operator may read it there (adminSecretNamespace).
                 properties:
                   name:
                     description: Name of the object.
@@ -117,17 +75,107 @@ spec:
                 required:
                 - name
                 type: object
-              superuserSecretNamespace:
-                description: 'SuperuserSecretNamespace: namespace of the superuser
-                  Secret (default: the namespace of the resource).'
+              adminSecretNamespace:
+                description: 'AdminSecretNamespace: namespace of the admin Secret
+                  (default: the namespace of the resource).'
+                type: string
+              database:
+                description: |-
+                  Database name (default: the name of the resource, with "-" replaced by "_"). With Oracle it is the schema: a
+                  user with that name.
+                type: string
+              deletionPolicy:
+                default: Retain
+                description: |-
+                  DeletionPolicy: Retain (default) keeps the database and the user when the resource is deleted; Delete drops
+                  them (the data is lost).
+                enum:
+                - Retain
+                - Delete
+                type: string
+              engine:
+                default: PostgreSQL
+                description: 'Engine of the server: PostgreSQL (default), Oracle or
+                  SQLServer.'
+                enum:
+                - PostgreSQL
+                - Oracle
+                - SQLServer
+                type: string
+              extensions:
+                description: Extensions (PostgreSQL only) to create in the database,
+                  for example [pgcrypto, vector].
+                items:
+                  type: string
+                type: array
+              host:
+                description: Host of the database server, for example dx-pg-rw.dx-shared.svc.cluster.local.
+                minLength: 1
+                type: string
+              oracle:
+                description: Oracle settings (required with engine Oracle).
+                properties:
+                  service:
+                    description: Service name of the pluggable database to connect
+                      to, for example FREEPDB1 or ORCLPDB1.
+                    minLength: 1
+                    type: string
+                  tablespace:
+                    default: USERS
+                    description: Tablespace for the quota of the user (default USERS).
+                    type: string
+                required:
+                - service
+                type: object
+              owner:
+                description: |-
+                  Owner: the user that owns the database and that the backend signs in with (default: the database name). With
+                  Oracle it is always the database (schema) name.
+                type: string
+              port:
+                description: 'Port (default: 5432 PostgreSQL, 1521 Oracle, 1433 SQL
+                  Server).'
+                format: int32
+                type: integer
+              secretName:
+                description: |-
+                  SecretName: Secret the operator writes for the backend, with engine, username, password, host, port, database,
+                  uri and jdbcUrl. Default: <name>-db.
+                type: string
+              sqlServer:
+                description: SQLServer settings (engine SQLServer).
+                properties:
+                  encrypt:
+                    default: mandatory
+                    description: 'Encrypt (TLS of the connection): disable, optional,
+                      mandatory (default) or strict (TDS 8).'
+                    enum:
+                    - disable
+                    - optional
+                    - mandatory
+                    - strict
+                    type: string
+                  trustServerCertificate:
+                    description: 'TrustServerCertificate: accept the certificate of
+                      the server without checking it (self-signed servers in labs).'
+                    type: boolean
+                type: object
+              sslMode:
+                description: 'SSLMode (PostgreSQL only): disable, prefer (default),
+                  require, verify-ca or verify-full.'
+                enum:
+                - disable
+                - prefer
+                - require
+                - verify-ca
+                - verify-full
                 type: string
             required:
+            - adminSecret
             - host
-            - superuserSecret
             type: object
           status:
-            description: PostgresDatabaseStatus is what the operator knows about the
-              database.
+            description: DXDatabaseStatus is what the operator knows about the database.
             properties:
               conditions:
                 items:

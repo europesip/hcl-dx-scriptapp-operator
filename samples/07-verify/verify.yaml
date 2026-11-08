@@ -2,7 +2,7 @@
 # operator never pushes it: it only checks that it is there and reports it (Ready / NotFound, events). Here it
 # checks the application of sample 01 by its WCM name.
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-hello-check
 spec:

@@ -1,7 +1,7 @@
 // visits-api: the tiny backend of sample 04. It counts the visits of each DX user in PostgreSQL.
 //   GET  /dxop-visits/api/visits          -> {"total": n, "users": n}
 //   POST /dxop-visits/api/visits?user=uid -> {"user": "...", "count": n, "total": n}
-// DATABASE_URL comes from the Secret the operator writes for the PostgresDatabase resource (key "uri").
+// DATABASE_URL comes from the Secret the operator writes for the DXDatabase resource (key "uri").
 package main
 
 import (

@@ -36,11 +36,11 @@ Short names: `dxconn`
 | `lastCheckTime` | string |  | LastCheckTime of the connection. |
 | `observedGeneration` | integer |  |  |
 
-## ScriptApplication
+## DXScriptApplication
 
-ScriptApplication is an HCL DX Script Application, kept in DX as the resource declares.
+DXScriptApplication is an HCL DX Script Application, kept in DX as the resource declares.
 
-Short names: `scriptapp`, `sa`
+Short names: `dxapp`, `dxsa`
 
 ### spec
 
@@ -51,7 +51,7 @@ Short names: `scriptapp`, `sa`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the application in DX when the resource is deleted; Delete removes it (pages that use it then show an error). |
 | `dependsOn` | []object |  | DependsOn: objects that must be ready first (for example the Deployment of the backend). |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| DXScriptApplication \| DXPage \| DXDamCollection \| DXDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, DXScriptApplication, DXPage, DXDamCollection, DXDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) pushes again if the application was deleted or edited in DX; Report only reports it. |
 | `mode` | Push \| Verify | `Push` | Mode: Push (default) or Verify. |
@@ -70,13 +70,13 @@ Short names: `scriptapp`, `sa`
 | `substitutions` | []object |  | Substitutions of ${NAME} placeholders in the text files. |
 | `substitutions[].name` | string (required) |  | Name of the placeholder: ${NAME} in the files. |
 | `substitutions[].value` | string |  | Value, as is. |
-| `substitutions[].valueFrom` | object |  | ValueFrom: a key of a ConfigMap or a Secret, or the URL of an asset of a DAMCollection (which then becomes a dependency). |
+| `substitutions[].valueFrom` | object |  | ValueFrom: a key of a ConfigMap or a Secret, or the URL of an asset of a DXDamCollection (which then becomes a dependency). |
 | `substitutions[].valueFrom.configMapKeyRef` | object |  | ConfigMapKeySelector selects a key of a ConfigMap in the same namespace. |
 | `substitutions[].valueFrom.configMapKeyRef.key` | string (required) |  |  |
 | `substitutions[].valueFrom.configMapKeyRef.name` | string (required) |  |  |
-| `substitutions[].valueFrom.damAsset` | object |  | DAMAsset: the URL of an asset of a DAMCollection in the same namespace. |
+| `substitutions[].valueFrom.damAsset` | object |  | DAMAsset: the URL of an asset of a DXDamCollection in the same namespace. |
 | `substitutions[].valueFrom.damAsset.asset` | string (required) |  | Asset: file name of the asset in the collection. |
-| `substitutions[].valueFrom.damAsset.collection` | string (required) |  | Collection: name of the DAMCollection resource. |
+| `substitutions[].valueFrom.damAsset.collection` | string (required) |  | Collection: name of the DXDamCollection resource. |
 | `substitutions[].valueFrom.secretKeyRef` | object |  | SecretKeyRef: remember that the value ends up in a file every visitor can download. |
 | `substitutions[].valueFrom.secretKeyRef.key` | string (required) |  |  |
 | `substitutions[].valueFrom.secretKeyRef.name` | string (required) |  |  |
@@ -126,14 +126,14 @@ Short names: `dxp`
 | `access` | object |  | Access: who can see the page (default: all authenticated users). |
 | `access.anonymous` | boolean |  | Anonymous: visitors who are not signed in. |
 | `access.authenticated` | boolean | `True` | Authenticated: all authenticated portal users (default true). |
-| `applications` | []object (required) |  | Applications shown on the page, one under the other: names of ScriptApplication resources in the same namespace (each one in a Web Content Viewer). They become dependencies of the page. |
+| `applications` | []object (required) |  | Applications shown on the page, one under the other: names of DXScriptApplication resources in the same namespace (each one in a Web Content Viewer). They become dependencies of the page. |
 | `applications[].name` | string (required) |  | Name of the object. |
 | `connectionRef` | object (required) |  | ConnectionRef: the DXConnection to use (its user must be a DX administrator: pages use XMLAccess). |
 | `connectionRef.name` | string (required) |  | Name of the object. |
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the page in DX when the resource is deleted; Delete removes it. |
 | `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| DXScriptApplication \| DXPage \| DXDamCollection \| DXDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, DXScriptApplication, DXPage, DXDamCollection, DXDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) recreates the page if it was deleted in DX; Report only reports it. |
 | `friendlyName` | string |  | FriendlyName of the page in its URL (default: the name of the resource). |
@@ -176,6 +176,7 @@ Short names: `dxtheme`
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `base` | object |  | Base theme copied first (default: Portal 8.5). |
+| `base.copyFiles` | boolean |  | CopyFiles: true (default) copies the files of the base theme first and puts the source on top; false uploads only the files of the source (a complete theme of its own), and the base is used only as the model of the registration. |
 | `base.folder` | string | `Portal8.5` | Folder of the base theme in the WebDAV store (default: Portal8.5, the HCL DX Portal 8.5 theme). |
 | `base.uniqueName` | string | `ibm.portal.85Theme` | UniqueName of the base theme registration (default: ibm.portal.85Theme). |
 | `connectionRef` | object (required) |  | ConnectionRef: the DXConnection to use. |
@@ -183,12 +184,14 @@ Short names: `dxtheme`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the theme in DX when the resource is deleted; Delete removes its registration and its folder (pages that use it fall back to the default theme). |
 | `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| DXScriptApplication \| DXPage \| DXDamCollection \| DXDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, DXScriptApplication, DXPage, DXDamCollection, DXDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `description` | string |  | Description of the theme. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) uploads and registers it again if the theme or its folder was deleted in DX; Report only reports it. |
 | `folder` | string |  | Folder of the theme in the WebDAV store (dav:fs-type1/themes/<folder>/). Default: the name of the resource. |
 | `headHTML` | string |  | HeadHTML: HTML inserted before </head> in every theme template (theme.html, theme_sidenav.html and their language versions): a <style>, a <link> to a file of the source (/wps/mycontenthandler/dav/fs-type1/themes/<folder>/...), a <script>... |
+| `layout` | string |  | Layout: default layout template of the theme, relative to its folder (for example layout-templates/1Column). Default: the one of the base theme, in the new folder. |
+| `profile` | string |  | Profile: resource aggregation profile of the theme, relative to its folder (for example profiles/profile_europesip.json). Default: the one of the base theme. |
 | `source` | object |  | Source: files added to (or replacing in) the copy of the base theme, at the same paths (for example css/my.css or images/logo.png). Optional. |
 | `source.configMap` | object |  | ConfigMap: every key of the ConfigMap is a file (data and binaryData). Handy for small applications: a ConfigMap and its Secret are limited to 1 MiB. Keys cannot contain "/", so a key "assets__app.js" becomes the file "assets/app.js". |
 | `source.configMap.name` | string (required) |  | Name of the ConfigMap. |
@@ -223,11 +226,11 @@ Short names: `dxtheme`
 | `sourceRevision` | string |  | SourceRevision of the files that were added. |
 | `uniqueName` | string |  | UniqueName of the registered theme. |
 
-## DAMCollection
+## DXDamCollection
 
-DAMCollection is a collection of the HCL DX Digital Asset Management, kept as the resource declares.
+DXDamCollection is a collection of the HCL DX Digital Asset Management, kept as the resource declares.
 
-Short names: `dam`
+Short names: `dxdam`
 
 ### spec
 
@@ -242,7 +245,7 @@ Short names: `dam`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the collection in the DAM when the resource is deleted; Delete removes it with its assets. |
 | `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| DXScriptApplication \| DXPage \| DXDamCollection \| DXDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, DXScriptApplication, DXPage, DXDamCollection, DXDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `description` | string |  | Description of the collection. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) uploads again what was deleted or replaced in DX; Report only reports it. |
@@ -282,27 +285,34 @@ Short names: `dam`
 | `observedGeneration` | integer |  |  |
 | `sourceRevision` | string |  | SourceRevision that was uploaded. |
 
-## PostgresDatabase
+## DXDatabase
 
-PostgresDatabase is a database for the backend of an application, created and kept by the operator.
+DXDatabase is a database for the backend of an application (PostgreSQL, Oracle or SQL Server), created and kept by the operator.
 
-Short names: `pgdb`
+Short names: `dxdb`
 
 ### spec
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `database` | string |  | Database name (default: the name of the resource, with "-" replaced by "_"). |
-| `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) keeps the database and the role when the resource is deleted; Delete drops them (the data is lost). |
-| `extensions` | []string |  | Extensions to create in the database, for example [pgcrypto, vector]. |
-| `host` | string (required) |  | Host of the PostgreSQL server, for example dx-pg-rw.dx-shared.svc.cluster.local. |
-| `owner` | string |  | Owner: role that owns the database (default: the database name). |
-| `port` | integer | `5432` | Port (default 5432). |
-| `secretName` | string |  | SecretName: Secret the operator writes for the backend, with username, password, host, port, database, uri (postgresql://...) and jdbcUrl. The password is generated once and kept. Default: <name>-db. |
-| `sslMode` | disable \| prefer \| require \| verify-ca \| verify-full | `prefer` | SSLMode: disable, prefer (default), require, verify-ca or verify-full. |
-| `superuserSecret` | object (required) |  | SuperuserSecret: Secret with "username" and "password" of a user that can create roles and databases. It may be in another namespace only if the operator is allowed to read it there (superuserSecretNamespace). |
-| `superuserSecret.name` | string (required) |  | Name of the object. |
-| `superuserSecretNamespace` | string |  | SuperuserSecretNamespace: namespace of the superuser Secret (default: the namespace of the resource). |
+| `adminSecret` | object (required) |  | AdminSecret: Secret with "username" and "password" of an administrator that can create users and databases (PostgreSQL: a superuser or CREATEROLE + CREATEDB; Oracle: CREATE USER and GRANT; SQL Server: sysadmin or dbcreator + securityadmin). In another namespace only if the operator may read it there (adminSecretNamespace). |
+| `adminSecret.name` | string (required) |  | Name of the object. |
+| `adminSecretNamespace` | string |  | AdminSecretNamespace: namespace of the admin Secret (default: the namespace of the resource). |
+| `database` | string |  | Database name (default: the name of the resource, with "-" replaced by "_"). With Oracle it is the schema: a user with that name. |
+| `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) keeps the database and the user when the resource is deleted; Delete drops them (the data is lost). |
+| `engine` | PostgreSQL \| Oracle \| SQLServer | `PostgreSQL` | Engine of the server: PostgreSQL (default), Oracle or SQLServer. |
+| `extensions` | []string |  | Extensions (PostgreSQL only) to create in the database, for example [pgcrypto, vector]. |
+| `host` | string (required) |  | Host of the database server, for example dx-pg-rw.dx-shared.svc.cluster.local. |
+| `oracle` | object |  | Oracle settings (required with engine Oracle). |
+| `oracle.service` | string (required) |  | Service name of the pluggable database to connect to, for example FREEPDB1 or ORCLPDB1. |
+| `oracle.tablespace` | string | `USERS` | Tablespace for the quota of the user (default USERS). |
+| `owner` | string |  | Owner: the user that owns the database and that the backend signs in with (default: the database name). With Oracle it is always the database (schema) name. |
+| `port` | integer |  | Port (default: 5432 PostgreSQL, 1521 Oracle, 1433 SQL Server). |
+| `secretName` | string |  | SecretName: Secret the operator writes for the backend, with engine, username, password, host, port, database, uri and jdbcUrl. Default: <name>-db. |
+| `sqlServer` | object |  | SQLServer settings (engine SQLServer). |
+| `sqlServer.encrypt` | disable \| optional \| mandatory \| strict | `mandatory` | Encrypt (TLS of the connection): disable, optional, mandatory (default) or strict (TDS 8). |
+| `sqlServer.trustServerCertificate` | boolean |  | TrustServerCertificate: accept the certificate of the server without checking it (self-signed servers in labs). |
+| `sslMode` | disable \| prefer \| require \| verify-ca \| verify-full |  | SSLMode (PostgreSQL only): disable, prefer (default), require, verify-ca or verify-full. |
 
 ### status
 

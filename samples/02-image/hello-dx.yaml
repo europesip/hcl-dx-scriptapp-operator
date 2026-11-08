@@ -1,7 +1,7 @@
 # 02 · A real React Script Application (Hello DX) from a bundle image: the operator reads the built files
 # straight from the registry (nothing runs in the cluster). Pin a digest for immutable deployments.
 apiVersion: dx.europesip.com/v1alpha1
-kind: ScriptApplication
+kind: DXScriptApplication
 metadata:
   name: dxop-hello-dx
 spec:

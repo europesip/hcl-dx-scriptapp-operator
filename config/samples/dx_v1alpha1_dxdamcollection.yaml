@@ -1,5 +1,5 @@
 apiVersion: dx.europesip.com/v1alpha1
-kind: DAMCollection
+kind: DXDamCollection
 metadata:
   labels:
     app.kubernetes.io/name: hcl-dx-scriptapp-operator

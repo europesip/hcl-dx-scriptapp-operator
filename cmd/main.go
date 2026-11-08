@@ -211,12 +211,12 @@ func main() {
 		setupLog.Error(err, "Failed to create controller", "controller", "dxconnection")
 		os.Exit(1)
 	}
-	if err := (&controller.ScriptApplicationReconciler{
+	if err := (&controller.DXScriptApplicationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Shared: shared,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "scriptapplication")
+		setupLog.Error(err, "Failed to create controller", "controller", "dxscriptapplication")
 		os.Exit(1)
 	}
 	if err := (&controller.DXPageReconciler{
@@ -235,20 +235,20 @@ func main() {
 		setupLog.Error(err, "Failed to create controller", "controller", "dxtheme")
 		os.Exit(1)
 	}
-	if err := (&controller.DAMCollectionReconciler{
+	if err := (&controller.DXDamCollectionReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Shared: shared,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "damcollection")
+		setupLog.Error(err, "Failed to create controller", "controller", "dxdamcollection")
 		os.Exit(1)
 	}
-	if err := (&controller.PostgresDatabaseReconciler{
+	if err := (&controller.DXDatabaseReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		Shared: shared,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "postgresdatabase")
+		setupLog.Error(err, "Failed to create controller", "controller", "dxdatabase")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

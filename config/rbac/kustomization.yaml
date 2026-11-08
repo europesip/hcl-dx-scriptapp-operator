@@ -22,18 +22,18 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the hcl-dx-scriptapp-operator itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- postgresdatabase_admin_role.yaml
-- postgresdatabase_editor_role.yaml
-- postgresdatabase_viewer_role.yaml
-- damcollection_admin_role.yaml
-- damcollection_editor_role.yaml
-- damcollection_viewer_role.yaml
+- dxdatabase_admin_role.yaml
+- dxdatabase_editor_role.yaml
+- dxdatabase_viewer_role.yaml
+- dxdamcollection_admin_role.yaml
+- dxdamcollection_editor_role.yaml
+- dxdamcollection_viewer_role.yaml
 - dxpage_admin_role.yaml
 - dxpage_editor_role.yaml
 - dxpage_viewer_role.yaml
-- scriptapplication_admin_role.yaml
-- scriptapplication_editor_role.yaml
-- scriptapplication_viewer_role.yaml
+- dxscriptapplication_admin_role.yaml
+- dxscriptapplication_editor_role.yaml
+- dxscriptapplication_viewer_role.yaml
 - dxconnection_admin_role.yaml
 - dxconnection_editor_role.yaml
 - dxconnection_viewer_role.yaml

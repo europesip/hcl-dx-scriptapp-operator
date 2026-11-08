@@ -11,16 +11,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// ScriptApplicationMode is how the application reaches DX.
+// DXScriptApplicationMode is how the application reaches DX.
 // +kubebuilder:validation:Enum=Push;Verify
-type ScriptApplicationMode string
+type DXScriptApplicationMode string
 
 const (
 	// ModePush: the operator pushes the application with DXClient (create or update) and keeps it as declared.
-	ModePush ScriptApplicationMode = "Push"
+	ModePush DXScriptApplicationMode = "Push"
 	// ModeVerify: the operator never pushes. It only checks that the application exists in DX (for example in
 	// an environment that receives content by syndication) and reports it.
-	ModeVerify ScriptApplicationMode = "Verify"
+	ModeVerify DXScriptApplicationMode = "Verify"
 )
 
 // WCMSettings are the settings of the Script Application in WCM.
@@ -55,7 +55,7 @@ type Substitution struct {
 	// Value, as is.
 	// +optional
 	Value string `json:"value,omitempty"`
-	// ValueFrom: a key of a ConfigMap or a Secret, or the URL of an asset of a DAMCollection (which then
+	// ValueFrom: a key of a ConfigMap or a Secret, or the URL of an asset of a DXDamCollection (which then
 	// becomes a dependency).
 	// +optional
 	ValueFrom *SubstitutionSource `json:"valueFrom,omitempty"`
@@ -68,21 +68,21 @@ type SubstitutionSource struct {
 	// SecretKeyRef: remember that the value ends up in a file every visitor can download.
 	// +optional
 	SecretKeyRef *SecretKeySelector `json:"secretKeyRef,omitempty"`
-	// DAMAsset: the URL of an asset of a DAMCollection in the same namespace.
+	// DAMAsset: the URL of an asset of a DXDamCollection in the same namespace.
 	// +optional
 	DAMAsset *DAMAssetSelector `json:"damAsset,omitempty"`
 }
 
-// DAMAssetSelector selects an asset of a DAMCollection.
+// DAMAssetSelector selects an asset of a DXDamCollection.
 type DAMAssetSelector struct {
-	// Collection: name of the DAMCollection resource.
+	// Collection: name of the DXDamCollection resource.
 	Collection string `json:"collection"`
 	// Asset: file name of the asset in the collection.
 	Asset string `json:"asset"`
 }
 
-// ScriptApplicationSpec is a Script Application as it must be in DX.
-type ScriptApplicationSpec struct {
+// DXScriptApplicationSpec is a Script Application as it must be in DX.
+type DXScriptApplicationSpec struct {
 	// ConnectionRef: the DXConnection to use.
 	ConnectionRef LocalObjectReference `json:"connectionRef"`
 	// Source of the built application (the content of dist/).
@@ -96,7 +96,7 @@ type ScriptApplicationSpec struct {
 	// Mode: Push (default) or Verify.
 	// +kubebuilder:default=Push
 	// +optional
-	Mode ScriptApplicationMode `json:"mode,omitempty"`
+	Mode DXScriptApplicationMode `json:"mode,omitempty"`
 	// DriftPolicy: Restore (default) pushes again if the application was deleted or edited in DX; Report only
 	// reports it.
 	// +kubebuilder:default=Restore
@@ -115,8 +115,8 @@ type ScriptApplicationSpec struct {
 	Suspend bool `json:"suspend,omitempty"`
 }
 
-// ScriptApplicationStatus is what the operator knows about the application in DX.
-type ScriptApplicationStatus struct {
+// DXScriptApplicationStatus is what the operator knows about the application in DX.
+type DXScriptApplicationStatus struct {
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// ContentID of the application in WCM.
@@ -160,7 +160,7 @@ type PushRecord struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=scriptapp;sa
+// +kubebuilder:resource:shortName=dxapp;dxsa
 // +kubebuilder:printcolumn:name="WCM name",type=string,JSONPath=`.spec.wcm.name`
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Reason",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].reason`
@@ -168,26 +168,26 @@ type PushRecord struct {
 // +kubebuilder:printcolumn:name="Last push",type=date,JSONPath=`.status.lastPushTime`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
-// ScriptApplication is an HCL DX Script Application, kept in DX as the resource declares.
-type ScriptApplication struct {
+// DXScriptApplication is an HCL DX Script Application, kept in DX as the resource declares.
+type DXScriptApplication struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitzero"`
-	Spec              ScriptApplicationSpec   `json:"spec"`
-	Status            ScriptApplicationStatus `json:"status,omitzero"`
+	Spec              DXScriptApplicationSpec   `json:"spec"`
+	Status            DXScriptApplicationStatus `json:"status,omitzero"`
 }
 
 // +kubebuilder:object:root=true
 
-// ScriptApplicationList contains a list of ScriptApplication.
-type ScriptApplicationList struct {
+// DXScriptApplicationList contains a list of DXScriptApplication.
+type DXScriptApplicationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitzero"`
-	Items           []ScriptApplication `json:"items"`
+	Items           []DXScriptApplication `json:"items"`
 }
 
 func init() {
 	SchemeBuilder.Register(func(s *runtime.Scheme) error {
-		s.AddKnownTypes(SchemeGroupVersion, &ScriptApplication{}, &ScriptApplicationList{})
+		s.AddKnownTypes(SchemeGroupVersion, &DXScriptApplication{}, &DXScriptApplicationList{})
 		return nil
 	})
 }

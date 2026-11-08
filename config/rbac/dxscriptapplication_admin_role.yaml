@@ -11,17 +11,17 @@ metadata:
   labels:
     app.kubernetes.io/name: hcl-dx-scriptapp-operator
     app.kubernetes.io/managed-by: kustomize
-  name: postgresdatabase-admin-role
+  name: scriptapplication-admin-role
 rules:
 - apiGroups:
   - dx.europesip.com
   resources:
-  - postgresdatabases
+  - dxscriptapplications
   verbs:
   - '*'
 - apiGroups:
   - dx.europesip.com
   resources:
-  - postgresdatabases/status
+  - dxscriptapplications/status
   verbs:
   - get

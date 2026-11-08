@@ -24,7 +24,7 @@ resources:
   controller: true
   domain: europesip.com
   group: dx
-  kind: ScriptApplication
+  kind: DXScriptApplication
   path: github.com/europesip/hcl-dx-scriptapp-operator/api/v1alpha1
   version: v1alpha1
 - api:
@@ -42,7 +42,7 @@ resources:
   controller: true
   domain: europesip.com
   group: dx
-  kind: DAMCollection
+  kind: DXDamCollection
   path: github.com/europesip/hcl-dx-scriptapp-operator/api/v1alpha1
   version: v1alpha1
 - api:
@@ -51,7 +51,7 @@ resources:
   controller: true
   domain: europesip.com
   group: dx
-  kind: PostgresDatabase
+  kind: DXDatabase
   path: github.com/europesip/hcl-dx-scriptapp-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

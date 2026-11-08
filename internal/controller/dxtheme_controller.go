@@ -150,10 +150,15 @@ func (r *DXThemeReconciler) reconcile(ctx context.Context, t *dxv1.DXTheme) (ctr
 		}
 		rev, srcDir = tree.Revision, tree.Dir
 	}
+	copyBase := t.Spec.Base.CopyFiles == nil || *t.Spec.Base.CopyFiles
+	if !copyBase && srcDir == "" {
+		return fail("InvalidSpec", fmt.Errorf("base.copyFiles: false needs a source with the files of the theme"), 0)
+	}
 	spec, _ := json.Marshal(struct {
-		F, U, BF, BU, H, D string
-		T                  map[string]string
-	}{folder, un, baseFolder, baseUN, t.Spec.HeadHTML, t.Spec.Description, t.Spec.Titles})
+		F, U, BF, BU, H, D, P, L string
+		C                        bool
+		T                        map[string]string
+	}{folder, un, baseFolder, baseUN, t.Spec.HeadHTML, t.Spec.Description, t.Spec.Profile, t.Spec.Layout, copyBase, t.Spec.Titles})
 	hash := hashOf(string(spec), rev, forceToken(t))
 
 	// What is in DX: the registration (and its dxop.hash) and the WebDAV folder
@@ -205,8 +210,10 @@ func (r *DXThemeReconciler) reconcile(ctx context.Context, t *dxv1.DXTheme) (ctr
 		return ctrl.Result{}, err
 	}
 	defer os.RemoveAll(work) //nolint:errcheck
-	if _, err := conn.Client.DownloadTheme(ctx, baseFolder, work); err != nil {
-		return fail("BaseThemeError", fmt.Errorf("copy of the base theme %s: %w", baseFolder, err), retryFailed)
+	if copyBase {
+		if _, err := conn.Client.DownloadTheme(ctx, baseFolder, work); err != nil {
+			return fail("BaseThemeError", fmt.Errorf("copy of the base theme %s: %w", baseFolder, err), retryFailed)
+		}
 	}
 	if srcDir != "" {
 		if err := copyTree(srcDir, work); err != nil {
@@ -235,7 +242,7 @@ func (r *DXThemeReconciler) reconcile(ctx context.Context, t *dxv1.DXTheme) (ctr
 		return fail("BaseThemeError", fmt.Errorf("export of the base theme %s: %s", baseUN, msg), retryFailed)
 	}
 	reg, err := dx.ThemeRegisterXML(baseOut, dx.ThemeRegistration{UniqueName: un, Folder: folder, BaseUniqueName: baseUN, BaseFolder: baseFolder,
-		Titles: t.Spec.Titles, Description: t.Spec.Description, Hash: hash})
+		Titles: t.Spec.Titles, Description: t.Spec.Description, Hash: hash, Profile: t.Spec.Profile, Layout: t.Spec.Layout})
 	if err != nil {
 		return fail("BaseThemeError", err, retryFailed)
 	}

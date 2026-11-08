@@ -85,3 +85,21 @@ func TestAddToHead(t *testing.T) {
 		t.Fatal("only the theme templates")
 	}
 }
+
+func TestThemeRegisterXMLProfileAndLayout(t *testing.T) {
+	export := strings.Replace(baseExport, `<parameter name="com.ibm.portal.isTemplate"`, `<parameter name="resourceaggregation.profile" type="string" update="set"><![CDATA[profiles/profile_deferred.json]]></parameter>
+      <parameter name="com.ibm.portal.isTemplate"`, 1)
+	x, err := ThemeRegisterXML(export, ThemeRegistration{UniqueName: "europesip.sample", Folder: "europesip", BaseUniqueName: "ibm.portal.85Theme",
+		BaseFolder: "Portal8.5", Titles: map[string]string{"en": "EUROPESIP"}, Hash: "h", Profile: "profiles/profile_europesip.json", Layout: "layout-templates/1Column"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`<![CDATA[profiles/profile_europesip.json]]>`, `name="com.ibm.portal.layout.template.href" type="string" update="set"><![CDATA[dav:fs-type1/themes/europesip/layout-templates/1Column/]]>`} {
+		if !strings.Contains(x, want) {
+			t.Errorf("missing %s in\n%s", want, x)
+		}
+	}
+	if strings.Contains(x, "profile_deferred") {
+		t.Error("the base profile must be replaced")
+	}
+}

@@ -3,10 +3,10 @@
 # It should be run by config/default
 resources:
 - bases/dx.europesip.com_dxconnections.yaml
-- bases/dx.europesip.com_scriptapplications.yaml
+- bases/dx.europesip.com_dxscriptapplications.yaml
 - bases/dx.europesip.com_dxpages.yaml
-- bases/dx.europesip.com_damcollections.yaml
-- bases/dx.europesip.com_postgresdatabases.yaml
+- bases/dx.europesip.com_dxdamcollections.yaml
+- bases/dx.europesip.com_dxdatabases.yaml
 - bases/dx.europesip.com_dxthemes.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 

@@ -43,48 +43,48 @@ rules:
 - apiGroups:
   - dx.europesip.com
   resources:
-  - damcollections
-  - dxpages
-  - dxthemes
-  - postgresdatabases
-  - scriptapplications
-  verbs:
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - dx.europesip.com
-  resources:
-  - damcollections/finalizers
-  - dxpages/finalizers
-  - dxthemes/finalizers
-  - postgresdatabases/finalizers
-  - scriptapplications/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - dx.europesip.com
-  resources:
-  - damcollections/status
-  - dxconnections/status
-  - dxpages/status
-  - dxthemes/status
-  - postgresdatabases/status
-  - scriptapplications/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - dx.europesip.com
-  resources:
   - dxconnections
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - dxconnections/status
+  - dxdamcollections/status
+  - dxdatabases/status
+  - dxpages/status
+  - dxscriptapplications/status
+  - dxthemes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - dxdamcollections
+  - dxdatabases
+  - dxpages
+  - dxscriptapplications
+  - dxthemes
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dx.europesip.com
+  resources:
+  - dxdamcollections/finalizers
+  - dxdatabases/finalizers
+  - dxpages/finalizers
+  - dxscriptapplications/finalizers
+  - dxthemes/finalizers
+  verbs:
+  - update
 - apiGroups:
   - events.k8s.io
   resources:

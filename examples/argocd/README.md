@@ -27,3 +27,10 @@ the resource (`prune`), and with `deletionPolicy: Delete` the operator also remo
 
 YAML anchors (`&health` / `*health`) keep one copy of the Lua script for the five resources; `kubectl patch`
 resolves them.
+
+## Tested
+
+With Argo CD v3.6.1 on the lab cluster (2026-11-08): the Application synced the 9 samples in about a minute,
+every resource reported Healthy with the operator's message, and a commit that changed sample 01 was pushed to DX
+6 seconds after the sync. In Argo CD 3 the health of each resource is shown in the UI and in the resource tree
+(`argocd app resources`, API `/applications/<name>/resource-tree`), not in `status.resources` of the Application.

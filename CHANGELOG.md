@@ -3,9 +3,11 @@
 **English** · [Español](CHANGELOG.es.md)
 
 To go back to an earlier release: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <version> --reuse-values`
-(the CRDs are compatible: 0.2.0 only adds DXTheme).
+(the CRDs are compatible: 0.2.1 only adds DXTheme).
 
-## 0.2.0 · 2026-11-08 · Themes
+## 0.2.1 · 2026-11-08 · Themes
+
+(0.2.0 was tagged but never published: its CI failed on a generated file header.)
 
 - New resource **DXTheme** (short name `dxtheme`): a WebDAV theme of its own. The operator copies a base theme of the
   same DX (default: Portal 8.5) over WebDAV, adds the files of its `source` (ConfigMap, image or URL, as the Script

@@ -12,3 +12,4 @@ resources:
   - 06-url/url.yaml
   - 07-verify/verify.yaml
   - 08-page/page.yaml
+  - 09-theme/theme.yaml

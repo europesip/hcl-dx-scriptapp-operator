@@ -4,8 +4,8 @@ description: >-
   Kubernetes operator for HCL DX Script Applications: it pushes them to WCM, creates their pages and DAM
   collections, prepares the database of their backend, and keeps everything as declared (drift correction).
 type: application
-version: 0.1.3
-appVersion: "0.1.3"
+version: 0.2.0
+appVersion: "0.2.0"
 home: https://github.com/europesip/hcl-dx-scriptapp-operator
 sources: [https://github.com/europesip/hcl-dx-scriptapp-operator]
 keywords: [hcl, dx, digital-experience, script-application, operator, gitops]

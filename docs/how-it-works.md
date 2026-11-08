@@ -88,6 +88,21 @@ Writes to the status are merge patches, so concurrent passes do not lose what wa
 - A Script Application that gets a new content ID (restored after a deletion) triggers its pages: the layout
   hash changes and the page is rebuilt.
 
+### DXTheme
+
+- **Desired**: the spec (folder, unique name, titles, base, head HTML) and the revision of its source, as a hash.
+- **Actual**: an XMLAccess export of the theme by unique name (the applied hash is kept in the theme as the parameter
+  `dxop.hash`) and a WebDAV listing of its folder (`dav:fs-type1/themes/<folder>/`).
+- **Apply**: download every file of the base theme over WebDAV, put the files of the source on top (same paths),
+  insert the head HTML before `</head>` in `theme.html`, `theme_sidenav.html` and their language versions, upload
+  the folder (MKCOL + PUT), and register the theme with a copy of the registration of the base theme (new unique
+  name, templates pointing at the new folder, `default="false"`, only the declared titles).
+- **Drift**: registration or folder missing in DX → upload and register again (`Restore`) or report.
+- **Delete** (policy Delete): delete the registration (XMLAccess) and the folder (WebDAV). Pages that use it fall
+  back to the default theme.
+- WebDAV and XMLAccess use basic auth, so the theme works the same with DX behind OpenID Connect.
+- DXClient `deploy-theme` is not used: its registration step fails on DX Compose CF239.
+
 ### DAMCollection
 
 - Find the collection by the ID in the status, or by name (so an existing one is adopted), or create it; give

@@ -3,7 +3,25 @@
 [English](CHANGELOG.md) · **Español**
 
 Para volver a una versión anterior: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <versión> --reuse-values`
-(los CRDs son compatibles en toda la 0.1.x).
+(los CRDs son compatibles: la 0.2.0 solo añade DXTheme).
+
+## 0.2.0 · 2026-11-08 · Temas
+
+- Recurso nuevo **DXTheme** (nombre corto `dxtheme`): un tema WebDAV propio. El operador copia un tema base del mismo
+  DX (por defecto Portal 8.5) por WebDAV, añade los ficheros de su `source` (ConfigMap, imagen o URL, como las Script
+  Applications) y el HTML de `headHTML` en el `<head>` de sus plantillas, sube la carpeta y registra el tema con
+  XMLAccess (copia del registro del tema base). La deriva (registro o carpeta borrados en DX) se restaura o se
+  avisa; `deletionPolicy: Delete` borra el registro y la carpeta.
+- Las páginas lo usan con `spec.theme` (su nombre único, por defecto `dxop.<namespace>.<nombre>`) y pueden esperarlo
+  con `dependsOn: [{kind: DXTheme, name: ...}]` (tipo de dependencia nuevo).
+- Ejemplo nuevo [09-theme](samples/09-theme/theme.yaml) y health check de ArgoCD para DXTheme.
+- Funciona con y sin OpenID Connect (autenticación básica para WebDAV y XMLAccess). Probado con DX Compose CF239,
+  con y sin Keycloak.
+- **Corrección:** tras un reinicio de DX (por ejemplo un `helm upgrade` de DX) la cookie SSO antigua seguía en el
+  operador, el nuevo login se saltaba el login por formulario y todas las llamadas respondían 401 hasta reiniciar el
+  operador (recursos en `DXError`). Ahora cada login empieza con el almacén de cookies vacío.
+- CRD nuevo: Helm solo instala los CRDs en la primera instalación; con una release existente, aplica antes
+  `charts/hcl-dx-scriptapp-operator/crds/`. Los demás CRDs solo ganan el tipo de dependencia `DXTheme`.
 
 ## 0.1.3 · 2026-11-08 · Un interruptor para la compatibilidad con OpenID Connect
 

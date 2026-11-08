@@ -7,6 +7,7 @@ resources:
 - bases/dx.europesip.com_dxpages.yaml
 - bases/dx.europesip.com_damcollections.yaml
 - bases/dx.europesip.com_postgresdatabases.yaml
+- bases/dx.europesip.com_dxthemes.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

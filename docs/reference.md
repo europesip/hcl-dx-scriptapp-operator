@@ -51,7 +51,7 @@ Short names: `scriptapp`, `sa`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the application in DX when the resource is deleted; Delete removes it (pages that use it then show an error). |
 | `dependsOn` | []object |  | DependsOn: objects that must be ready first (for example the Deployment of the backend). |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection or PostgresDatabase. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) pushes again if the application was deleted or edited in DX; Report only reports it. |
 | `mode` | Push \| Verify | `Push` | Mode: Push (default) or Verify. |
@@ -133,7 +133,7 @@ Short names: `dxp`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the page in DX when the resource is deleted; Delete removes it. |
 | `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection or PostgresDatabase. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) recreates the page if it was deleted in DX; Report only reports it. |
 | `friendlyName` | string |  | FriendlyName of the page in its URL (default: the name of the resource). |
@@ -165,6 +165,64 @@ Short names: `dxp`
 | `uniqueName` | string |  | UniqueName of the page in DX. |
 | `url` | string |  | URL of the page (for authenticated users), when the parent is the Home page. |
 
+## DXTheme
+
+DXTheme is a theme of HCL DX Compose (WebDAV based), kept in DX as the resource declares.
+
+Short names: `dxtheme`
+
+### spec
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `base` | object |  | Base theme copied first (default: Portal 8.5). |
+| `base.folder` | string | `Portal8.5` | Folder of the base theme in the WebDAV store (default: Portal8.5, the HCL DX Portal 8.5 theme). |
+| `base.uniqueName` | string | `ibm.portal.85Theme` | UniqueName of the base theme registration (default: ibm.portal.85Theme). |
+| `connectionRef` | object (required) |  | ConnectionRef: the DXConnection to use. |
+| `connectionRef.name` | string (required) |  | Name of the object. |
+| `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the theme in DX when the resource is deleted; Delete removes its registration and its folder (pages that use it fall back to the default theme). |
+| `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
+| `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
+| `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
+| `description` | string |  | Description of the theme. |
+| `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) uploads and registers it again if the theme or its folder was deleted in DX; Report only reports it. |
+| `folder` | string |  | Folder of the theme in the WebDAV store (dav:fs-type1/themes/<folder>/). Default: the name of the resource. |
+| `headHTML` | string |  | HeadHTML: HTML inserted before </head> in every theme template (theme.html, theme_sidenav.html and their language versions): a <style>, a <link> to a file of the source (/wps/mycontenthandler/dav/fs-type1/themes/<folder>/...), a <script>... |
+| `source` | object |  | Source: files added to (or replacing in) the copy of the base theme, at the same paths (for example css/my.css or images/logo.png). Optional. |
+| `source.configMap` | object |  | ConfigMap: every key of the ConfigMap is a file (data and binaryData). Handy for small applications: a ConfigMap and its Secret are limited to 1 MiB. Keys cannot contain "/", so a key "assets__app.js" becomes the file "assets/app.js". |
+| `source.configMap.name` | string (required) |  | Name of the ConfigMap. |
+| `source.image` | object |  | Image: an OCI image (a "bundle image") that carries the files. The operator reads its layers directly from the registry: nothing runs in the cluster. Use a digest (repo@sha256:...) for immutable deployments. |
+| `source.image.path` | string | `/app` | Path inside the image where the files are (default /app). |
+| `source.image.pullSecrets` | []object |  | PullSecrets: Secrets of type kubernetes.io/dockerconfigjson for a private registry. |
+| `source.image.pullSecrets[].name` | string (required) |  | Name of the object. |
+| `source.image.ref` | string (required) |  | Reference of the image, for example ghcr.io/acme/my-app:1.2.0 or ghcr.io/acme/my-app@sha256:... |
+| `source.url` | object |  | URL: a .tar.gz, .tgz or .zip archive downloaded over HTTP(S), for example a CI artifact or a GitHub release asset. |
+| `source.url.path` | string |  | Path inside the archive where the files are (default: the root). |
+| `source.url.sha256` | string |  | SHA256 of the archive (hex). Recommended: the download is rejected if it does not match, and the operator only downloads it again when this value changes. |
+| `source.url.url` | string (required) |  | URL of a .tar.gz, .tgz or .zip archive. |
+| `suspend` | boolean |  | Suspend: stop reconciling. |
+| `titles` | object (required) |  | Titles by locale (for example {en: "My theme", es: "Mi tema"}). At least one. |
+| `uniqueName` | string |  | UniqueName of the theme registration (default dxop.<namespace>.<name>). Pages refer to it (DXPage spec.theme). |
+
+### status
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `appliedHash` | string |  | AppliedHash: hash of what was uploaded and registered (also kept as the theme parameter dxop.hash). |
+| `conditions` | []object |  |  |
+| `conditions[].lastTransitionTime` | string (required) |  | lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed. If that is not known, then using the time when the API field changed is acceptable. |
+| `conditions[].message` | string (required) |  | message is a human readable message indicating details about the transition. This may be an empty string. |
+| `conditions[].observedGeneration` | integer |  | observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance. |
+| `conditions[].reason` | string (required) |  | reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty. |
+| `conditions[].status` | True \| False \| Unknown (required) |  | status of the condition, one of True, False, Unknown. |
+| `conditions[].type` | string (required) |  | type of condition in CamelCase or in foo.example.com/CamelCase. |
+| `files` | integer |  | Files uploaded to the WebDAV folder. |
+| `lastApplyTime` | string |  |  |
+| `observedGeneration` | integer |  |  |
+| `sourceRevision` | string |  | SourceRevision of the files that were added. |
+| `uniqueName` | string |  | UniqueName of the registered theme. |
+
 ## DAMCollection
 
 DAMCollection is a collection of the HCL DX Digital Asset Management, kept as the resource declares.
@@ -184,7 +242,7 @@ Short names: `dam`
 | `deletionPolicy` | Retain \| Delete | `Retain` | DeletionPolicy: Retain (default) leaves the collection in the DAM when the resource is deleted; Delete removes it with its assets. |
 | `dependsOn` | []object |  | DependsOn: other objects that must be ready first. |
 | `dependsOn[].apiVersion` | string |  | APIVersion of the object, for example apps/v1 (default) or dx.europesip.com/v1alpha1. |
-| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection or PostgresDatabase. |
+| `dependsOn[].kind` | Deployment \| StatefulSet \| Job \| ScriptApplication \| DXPage \| DAMCollection \| PostgresDatabase \| DXTheme (required) |  | Kind: Deployment, StatefulSet, Job, ScriptApplication, DXPage, DAMCollection, PostgresDatabase or DXTheme. |
 | `dependsOn[].name` | string (required) |  | Name of the object, in the same namespace. |
 | `description` | string |  | Description of the collection. |
 | `driftPolicy` | Restore \| Report | `Restore` | DriftPolicy: Restore (default) uploads again what was deleted or replaced in DX; Report only reports it. |

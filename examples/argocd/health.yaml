@@ -24,3 +24,4 @@ data:
   resource.customizations.health.dx.europesip.com_DAMCollection: *health
   resource.customizations.health.dx.europesip.com_PostgresDatabase: *health
   resource.customizations.health.dx.europesip.com_DXConnection: *health
+  resource.customizations.health.dx.europesip.com_DXTheme: *health

@@ -54,6 +54,19 @@
 - Deleting a collection (policy Delete) ignores media references: pages and applications using its assets show
   broken links.
 
+## Themes
+
+- **WebDAV themes only** (the theme files in `dav:fs-type1/themes/`). Themes packaged as a WAR/EAR are not
+  supported.
+- **A copy of a theme of the same DX**: the base (default Portal 8.5) must exist in that DX. The theme does not
+  follow later changes of the base: force a reconciliation (or change the resource) to copy it again.
+- **The folder and the unique name are the keys**: renaming them creates a second theme; the old one stays in DX
+  (unless the policy is Delete).
+- **Applying a change uploads the whole folder** (about 430 files for Portal 8.5, a minute or two).
+- **Edits made in DX to the files of the theme are not detected**; only a deleted registration or folder is.
+- **Pages** pick the theme with `spec.theme` (its unique name); for the layouts of the new theme, point
+  `layoutTemplate` at `dav:fs-type1/themes/<folder>/layout-templates/...`.
+
 ## PostgresDatabase
 
 - An existing PostgreSQL server and a superuser Secret readable by the operator (it may be in another namespace

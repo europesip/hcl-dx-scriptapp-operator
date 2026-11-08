@@ -81,3 +81,40 @@ func TestFormLoginCanBeTurnedOff(t *testing.T) {
 		t.Fatalf("err %v, form logins %d: want none", err, form)
 	}
 }
+
+// After a restart of DX the old WAS_n cookie is no longer valid: the second login must not keep it (it made the
+// form login look unnecessary and every call answered 401 until the operator restarted).
+func TestReloginDropsStaleCookie(t *testing.T) {
+	gen := "1"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/dx/api/core/v1/auth/login":
+			_, _ = w.Write([]byte(`{"statusCode":200}`))
+		case "/wps/j_security_check":
+			http.SetCookie(w, &http.Cookie{Name: "WAS_n123456", Value: "token" + gen, Path: "/"})
+			w.WriteHeader(http.StatusFound)
+		case "/dx/api/core/v1/dxmyrest/webcontent/contents/x":
+			if ck, err := r.Cookie("WAS_n123456"); err != nil || ck.Value != "token"+gen {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			_, _ = w.Write([]byte(`{"id":"x"}`))
+		}
+	}))
+	defer srv.Close()
+	c, _ := NewClient(Config{BaseURL: srv.URL, Username: "wpsadmin", Password: "secret"})
+	get := func() int {
+		resp, err := c.Do(context.Background(), http.MethodGet, "/dx/api/core/v1/dxmyrest/webcontent/contents/x", nil, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp.Status
+	}
+	if s := get(); s != http.StatusOK {
+		t.Fatalf("first call: %d", s)
+	}
+	gen = "2" // DX restarted: the session of generation 1 is gone
+	if s := get(); s != http.StatusOK {
+		t.Fatalf("after the restart of DX: %d, want 200 (a new form login)", s)
+	}
+}

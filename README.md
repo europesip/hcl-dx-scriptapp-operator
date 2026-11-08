@@ -76,6 +76,7 @@ The operator turns those steps into **resources with a desired state and a statu
 | **ScriptApplication** | Gets the built files from an **OCI image** (read straight from the registry, nothing runs), a **ConfigMap** or an **archive URL**; replaces `${NAME}` placeholders (values, ConfigMaps, Secrets, URLs of DAM assets); checks the WCM limits; **pushes** with DXClient only when something changed; restores it if it was **deleted or edited in DX**; removes it on delete if asked |
 | **DXPage** | Creates the page with its Script Applications (XMLAccess): titles by locale, access, theme, position. Keeps the layout and the settings people make on it across updates; **recreates** it if it was deleted in DX |
 | **DAMCollection** | Creates the collection and uploads every file of its source; a changed file becomes a **new version of the same asset** (same URL); restores deleted assets; public or authenticated access; optional prune |
+| **DXTheme** | A **theme** of its own: copies a base theme of the same DX (default Portal 8.5) over WebDAV, adds the files of its source (`css/…`, `images/…`) and HTML in the `<head>` of its templates, and registers it with XMLAccess. Pages use it with `spec.theme`; restored if its registration or folder is deleted in DX |
 | **PostgresDatabase** | Creates the database, its owner and extensions in an existing PostgreSQL, and writes a **Secret** for the backend (`uri`, `jdbcUrl`, user, password...). The password is generated once and kept |
 
 And for every resource: **dependencies** (`dependsOn`: Deployments, StatefulSets, Jobs and the other resources,
@@ -113,7 +114,7 @@ docker run --rm hclcr.io/dx-public/dxclient:v95_CF239_20261103-1404 /dxclient/bi
 ```
 
 ```bash
-helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.1.3 \
+helm upgrade --install dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version 0.2.0 \
   -n dxop-system --create-namespace --set dxclient.acceptLicense=true
 ```
 
@@ -172,6 +173,7 @@ Small applications, each one showing one case. Apply them in a namespace with th
 | [06-url](samples/06-url/url.yaml) | An application from a `.tar.gz` URL (a GitHub tag), with its SHA256 |
 | [07-verify](samples/07-verify/verify.yaml) | `mode: Verify`: only check that an application is in DX (syndicated environments) |
 | [08-page](samples/08-page/page.yaml) | One page with three applications, a position and a deletion policy |
+| [09-theme](samples/09-theme/theme.yaml) | A theme of its own (Portal 8.5 with a blue banner) and a page that uses it |
 
 ![Samples 03, 05 and 01 on the page of sample 08](docs/images/showcase.png)
 

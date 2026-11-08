@@ -57,6 +57,19 @@
 - Borrar una colección (política Delete) ignora las referencias: las páginas y aplicaciones que usan sus assets
   muestran enlaces rotos.
 
+## Temas
+
+- **Solo temas WebDAV** (los ficheros del tema en `dav:fs-type1/themes/`). No se soportan temas empaquetados como
+  WAR/EAR.
+- **Una copia de un tema del mismo DX**: el tema base (por defecto Portal 8.5) tiene que existir en ese DX. El tema
+  no sigue los cambios posteriores del base: fuerza una reconciliación (o cambia el recurso) para copiarlo otra vez.
+- **La carpeta y el nombre único son la clave**: cambiarlos crea un segundo tema; el anterior se queda en DX (salvo
+  con la política Delete).
+- **Aplicar un cambio sube la carpeta entera** (unos 430 ficheros con Portal 8.5, uno o dos minutos).
+- **No se detectan los cambios hechos en DX a los ficheros del tema**; solo que se borre el registro o la carpeta.
+- **Las páginas** eligen el tema con `spec.theme` (su nombre único); para los layouts del tema nuevo, apunta
+  `layoutTemplate` a `dav:fs-type1/themes/<carpeta>/layout-templates/...`.
+
 ## PostgresDatabase
 
 - Un servidor PostgreSQL existente y un Secret de superusuario que el operador pueda leer (puede estar en otro

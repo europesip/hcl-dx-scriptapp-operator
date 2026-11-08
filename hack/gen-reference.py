@@ -2,7 +2,7 @@
 """Generates docs/reference.md from the CRDs (config/crd/bases): every field with its type, default and description."""
 import glob, os, yaml
 os.chdir(os.path.join(os.path.dirname(__file__), ".."))
-ORDER = ["DXConnection", "ScriptApplication", "DXPage", "DAMCollection", "PostgresDatabase"]
+ORDER = ["DXConnection", "ScriptApplication", "DXPage", "DXTheme", "DAMCollection", "PostgresDatabase"]
 crds = {}
 for f in glob.glob("config/crd/bases/*.yaml"):
     c = yaml.safe_load(open(f))

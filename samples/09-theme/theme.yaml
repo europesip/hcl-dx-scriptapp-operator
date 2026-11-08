@@ -1,0 +1,38 @@
+# 09 · A theme of its own: a copy of the Portal 8.5 theme of the same DX (WebDAV files + XMLAccess registration)
+# with a little CSS added to the head of its templates, and a page that uses it. The theme is registered with the
+# unique name dxop.sample.blue (default: dxop.<namespace>.<name>); the page refers to it with spec.theme. To add files (css/…, images/…), give the theme a
+# source (configMap, image or url), as the Script Applications. It works the same with and without OIDC (the
+# operator uses basic auth for WebDAV and XMLAccess).
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXTheme
+metadata:
+  name: dxop-blue
+spec:
+  connectionRef: { name: dx }
+  uniqueName: dxop.sample.blue
+  titles: { en: "DXOP Blue", es: "DXOP Azul" }
+  description: Portal 8.5 with a blue banner, managed by the operator
+  headHTML: |
+    <style>
+      .wpthemeHeader, .wpthemeBanner, .wpthemeBannerInner { background: linear-gradient(90deg,#0b1f5c,#1d4ed8) !important; }
+      .wpthemeHeader a, .wpthemeBanner a { color: #fff !important; }
+      .wpthemeFooter { border-top: 4px solid #1d4ed8; }
+    </style>
+  deletionPolicy: Delete       # delete its registration and its folder when this resource is deleted
+---
+apiVersion: dx.europesip.com/v1alpha1
+kind: DXPage
+metadata:
+  name: dxop-themed
+spec:
+  connectionRef: { name: dx }
+  friendlyName: dxop-themed
+  titles: { en: "DXOP Themed", es: "DXOP Con tema" }
+  ordinal: 910
+  theme: dxop.sample.blue      # the unique name of the DXTheme above
+  layoutTemplate: dav:fs-type1/themes/dxop-blue/layout-templates/1Column
+  applications:
+    - name: dxop-hello
+  dependsOn:
+    - { kind: DXTheme, name: dxop-blue }
+  deletionPolicy: Delete

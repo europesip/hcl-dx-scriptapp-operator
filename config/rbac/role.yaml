@@ -45,6 +45,7 @@ rules:
   resources:
   - damcollections
   - dxpages
+  - dxthemes
   - postgresdatabases
   - scriptapplications
   verbs:
@@ -58,6 +59,7 @@ rules:
   resources:
   - damcollections/finalizers
   - dxpages/finalizers
+  - dxthemes/finalizers
   - postgresdatabases/finalizers
   - scriptapplications/finalizers
   verbs:
@@ -68,6 +70,7 @@ rules:
   - damcollections/status
   - dxconnections/status
   - dxpages/status
+  - dxthemes/status
   - postgresdatabases/status
   - scriptapplications/status
   verbs:

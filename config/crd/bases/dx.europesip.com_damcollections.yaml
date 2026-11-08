@@ -104,7 +104,7 @@ spec:
                       type: string
                     kind:
                       description: 'Kind: Deployment, StatefulSet, Job, ScriptApplication,
-                        DXPage, DAMCollection or PostgresDatabase.'
+                        DXPage, DAMCollection, PostgresDatabase or DXTheme.'
                       enum:
                       - Deployment
                       - StatefulSet
@@ -113,6 +113,7 @@ spec:
                       - DXPage
                       - DAMCollection
                       - PostgresDatabase
+                      - DXTheme
                       type: string
                     name:
                       description: Name of the object, in the same namespace.

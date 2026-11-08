@@ -72,6 +72,21 @@ Las escrituras en el status son merge patches, así que dos pasadas simultáneas
 - Una Script Application que recibe un content ID nuevo (restaurada tras un borrado) dispara sus páginas: cambia
   el hash del layout y la página se reconstruye.
 
+### DXTheme
+
+- **Deseado**: el spec (carpeta, nombre único, títulos, base, HTML de cabecera) y la revisión de su origen, como un hash.
+- **Real**: un export de XMLAccess del tema por nombre único (el hash aplicado se guarda en el tema, en el parámetro
+  `dxop.hash`) y un listado WebDAV de su carpeta (`dav:fs-type1/themes/<carpeta>/`).
+- **Aplicar**: descargar todos los ficheros del tema base por WebDAV, poner encima los del origen (mismas rutas),
+  insertar el HTML de cabecera antes de `</head>` en `theme.html`, `theme_sidenav.html` y sus versiones por idioma,
+  subir la carpeta (MKCOL + PUT) y registrar el tema con una copia del registro del tema base (nombre único nuevo,
+  plantillas apuntando a la carpeta nueva, `default="false"`, solo los títulos declarados).
+- **Deriva**: falta el registro o la carpeta en DX → subirlo y registrarlo otra vez (`Restore`) o avisar.
+- **Borrar** (política Delete): borrar el registro (XMLAccess) y la carpeta (WebDAV). Las páginas que lo usan pasan
+  al tema por defecto.
+- WebDAV y XMLAccess usan autenticación básica: el tema funciona igual con DX detrás de OpenID Connect.
+- No se usa `deploy-theme` de DXClient: su paso de registro falla en DX Compose CF239.
+
 ### DAMCollection
 
 - Buscar la colección por el ID del status, o por nombre (así se adopta una existente), o crearla; dar el rol User

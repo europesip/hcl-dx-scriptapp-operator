@@ -203,6 +203,12 @@ func (r *DXPageReconciler) reconcile(ctx context.Context, p *dxv1.DXPage) (ctrl.
 		reason = "Updated"
 	}
 	if reason == "" {
+		if p.Status.AppliedHash == "" {
+			// Adopted: the page is already in DX exactly as declared (applied before by this operator, e.g. by an
+			// earlier resource with the same spec). Record it, so deletionPolicy and layout changes apply to it.
+			p.Status.AppliedHash, p.Status.LayoutHash, p.Status.LastApplyTime = page.Hash, layoutHash, now()
+			r.Recorder.Eventf(p, nil, corev1.EventTypeNormal, "Adopted", "Apply", "page %s adopted (already in DX as declared)", un)
+		}
 		setCondition(&p.Status.Conditions, gen, dxv1.ConditionDrifted, false, "InSync", "DX matches the resource")
 		setCondition(&p.Status.Conditions, gen, dxv1.ConditionReady, true, "InSync", "page "+un+" is in DX")
 		return ctrl.Result{RequeueAfter: conn.Resync()}, nil

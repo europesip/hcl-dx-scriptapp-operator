@@ -1,0 +1,78 @@
+name: "🚀 Enhancement (spec)"
+description: A new capability, option or use case. Written as a short spec, so that it can be built and tested from the issue alone.
+title: "[Enhancement] "
+projects: ["europesip/3"]
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is the **spec** of the change: what and why, not how. Keep it short and testable.
+        The maintainers add the priority (`P1`-`P3`), the area, the **Effort** and the **Release** when it is triaged.
+        See [docs/workflow.md](https://github.com/europesip/hcl-dx-scriptapp-operator/blob/main/docs/workflow.md). **Never paste credentials, keys or licence data.**
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One paragraph. What should change, and for whom?
+    validations: {required: true}
+  - type: textarea
+    id: current
+    attributes:
+      label: Current behaviour (checked in the code)
+      description: How it works today, with the files involved.
+    validations: {required: true}
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: "The expected behaviour, from the user's point of view. Split it in parts if it is big."
+    validations: {required: true}
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: "Checkable statements. Prefer \"Given ... when ... then ...\". The change is done when every box is ticked."
+      value: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] `make test` passes and the samples are Ready on the lab cluster
+    validations: {required: true}
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this change deliberately does not do.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - "Controllers (reconcile, status, events, drift)"
+        - "Custom resources (DXScriptApplication, DXPage, DXTheme...)"
+        - "DX access (DXClient, WCM, XMLAccess, DAM)"
+        - "DXDatabase (PostgreSQL, Oracle, SQL Server)"
+        - "Packaging (Helm chart, image, CI, samples)"
+        - "Documentation"
+    validations: {required: true}
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test plan
+      description: "How it will be proven: `make test` (envtest), the samples on the lab cluster, drift correction and Argo CD sync when it applies."
+    validations: {required: true}
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Release impact
+      options:
+        - label: "CHANGELOG in English and Spanish"
+        - label: "Documentation in English and Spanish (README, docs/reference.md)"
+        - label: "CRD changes (new fields, versions, conversion)"
+        - label: "Helm chart values or version"
+        - label: "Samples"
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: HCL documentation, related issues, discussions.

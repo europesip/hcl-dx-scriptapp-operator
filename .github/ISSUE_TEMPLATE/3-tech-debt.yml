@@ -1,0 +1,48 @@
+name: "🧱 Tech debt"
+description: A shortcut taken on purpose (or found later) that should be paid back before it becomes a bug.
+title: "[Tech debt] "
+projects: ["europesip/3"]
+labels: ["tech-debt"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What the shortcut is, in one paragraph.
+    validations: {required: true}
+  - type: textarea
+    id: current
+    attributes:
+      label: Current situation (checked in the code)
+      description: Files and behaviour involved, and why it was done this way.
+    validations: {required: true}
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk if it is not fixed
+    validations: {required: true}
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations: {required: true}
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+    validations: {required: true}
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - "Controllers (reconcile, status, events, drift)"
+        - "Custom resources (DXScriptApplication, DXPage, DXTheme...)"
+        - "DX access (DXClient, WCM, XMLAccess, DAM)"
+        - "DXDatabase (PostgreSQL, Oracle, SQL Server)"
+        - "Packaging (Helm chart, image, CI, samples)"
+        - "Documentation"
+    validations: {required: true}

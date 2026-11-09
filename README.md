@@ -35,7 +35,7 @@ spec:
 ```
 $ kubectl get dxscriptapplications,dxpages
 NAME                                          READY   REASON   CONTENT ID                             LAST PUSH
-scriptapplication.dx.europesip.com/time-off   True    InSync   65f22d2a-8eed-4dfc-bd13-f3d1fce68143   3m
+dxscriptapplication.dx.europesip.com/time-off   True    InSync   65f22d2a-8eed-4dfc-bd13-f3d1fce68143   3m
 NAME                               UNIQUE NAME              READY   REASON
 dxpage.dx.europesip.com/time-off   dxop.intranet.time-off   True    InSync
 ```
@@ -155,7 +155,7 @@ kubectl -n intranet get events --field-selector involvedObject.kind=DXScriptAppl
 Force a full reconciliation now (a push even if nothing changed):
 
 ```bash
-kubectl -n intranet annotate scriptapplication time-off dx.europesip.com/reconcile="$(date +%s)" --overwrite
+kubectl -n intranet annotate dxscriptapplication time-off dx.europesip.com/reconcile="$(date +%s)" --overwrite
 ```
 
 ## Samples

@@ -150,7 +150,7 @@ kubectl -n intranet get events --field-selector involvedObject.kind=DXScriptAppl
 Forzar una reconciliación completa ahora (un push aunque no haya cambios):
 
 ```bash
-kubectl -n intranet annotate scriptapplication vacaciones dx.europesip.com/reconcile="$(date +%s)" --overwrite
+kubectl -n intranet annotate dxscriptapplication vacaciones dx.europesip.com/reconcile="$(date +%s)" --overwrite
 ```
 
 ## Ejemplos

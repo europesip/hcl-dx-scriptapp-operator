@@ -35,6 +35,15 @@
 ## Pages
 
 - **The user of the connection must be a DX administrator** (XMLAccess).
+- **Changes made in the DX UI: only a deleted page is detected (for now).** A page deleted in DX, from the UI
+  (Site Manager → *Delete Page*) or by script, is recreated at the next resync (by default every 5 minutes), with
+  its titles and applications. A page that is still there but was **changed** in the UI (renamed, friendly URL,
+  applications removed or added, access, theme, layout or position) is **not** detected yet: the operator compares
+  a hash it stored on the page, which the UI does not change, so the page stays `InSync`. To apply the declared page
+  again, force a reconciliation:
+  `kubectl -n <namespace> annotate dxpage <name> dx.europesip.com/reconcile="$(date +%s)" --overwrite`.
+  Fixing it (comparing the real state of the page) is
+  [issue #2](https://github.com/europesip/hcl-dx-scriptapp-operator/issues/2).
 - **Changing the list of applications recreates the page** (XMLAccess cannot replace the components of a page
   in place): settings made on the viewers and changes to the layout are lost. Titles, access, theme, parent and
   position are updated in place.

@@ -36,6 +36,15 @@
 ## Páginas
 
 - **El usuario de la conexión debe ser administrador de DX** (XMLAccess).
+- **Cambios hechos en la interfaz de DX: de momento solo se detecta una página borrada.** Una página borrada en DX,
+  desde la interfaz (Site Manager → *Delete Page*) o por script, se vuelve a crear en la siguiente resincronización
+  (por defecto cada 5 minutos), con sus títulos y aplicaciones. Una página que sigue existiendo pero que se ha
+  **cambiado** en la interfaz (renombrada, URL amigable, aplicaciones quitadas o añadidas, acceso, tema, layout o
+  posición) **todavía no** se detecta: el operador compara una huella que guardó en la página, y la interfaz no la
+  cambia, así que la página sigue `InSync`. Para volver a aplicar la página declarada, fuerza una reconciliación:
+  `kubectl -n <namespace> annotate dxpage <nombre> dx.europesip.com/reconcile="$(date +%s)" --overwrite`.
+  Corregirlo (comparar el estado real de la página) es el
+  [issue #2](https://github.com/europesip/hcl-dx-scriptapp-operator/issues/2).
 - **Cambiar la lista de aplicaciones vuelve a crear la página** (XMLAccess no puede sustituir los componentes de
   una página): se pierden los ajustes de los visores y los cambios de layout. Títulos, acceso, tema, padre y
   posición se actualizan sin recrearla.

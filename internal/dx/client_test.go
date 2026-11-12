@@ -136,3 +136,16 @@ func TestXMLAccessRetriesEmptyAnswer(t *testing.T) {
 		t.Fatalf("calls %d, err %v", calls, err)
 	}
 }
+
+// The letter after WAS_ depends on the DX (WAS_n on the lab DX, WAS_p on another CF239): any WAS_ cookie is the session,
+// the other Liberty cookies (WASReqURL..., WASOidc...) are not.
+func TestSessionCookieNames(t *testing.T) {
+	for name, want := range map[string]bool{
+		"LtpaToken2": true, "LtpaToken": true, "WAS_n123456": true, "WAS_p11626475": true,
+		"WASReqURLOidcp926085583": false, "WASOidcStatep926085583": false, "WASOidcSession": false, "JSESSIONID": false,
+	} {
+		if got := sessionCookie(name); got != want {
+			t.Errorf("sessionCookie(%q) = %v, want %v", name, got, want)
+		}
+	}
+}

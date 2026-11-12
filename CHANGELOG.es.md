@@ -5,6 +5,14 @@
 Para volver a una versión anterior: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <versión> --reuse-values`
 (la 0.3.0 renombró los recursos: mira sus notas).
 
+## Sin publicar · Cookie de sesión OIDC WAS_p...
+
+- **Corrección:** con OpenID Connect, Liberty llama a la cookie de SSO de DX `WAS_<letra><hash>`, y la letra depende del
+  DX (`WAS_n...` en el DX de los labs, `WAS_p...` en otro DX Compose CF239). El operador solo aceptaba `WAS_n...`: el
+  `DXConnection` se quedaba en `LoginFailed` ("DX did not open a session ... form login HTTP 302"). Ahora cualquier
+  cookie `WAS_` es la sesión (`WASReqURL...` y `WASOidc...` no). Probado con DX Compose CF239 + Keycloak 26.3:
+  `DXConnection` Ready, el ejemplo 01 subido y su página creada.
+
 ## 0.3.1 · 2026-11-08 · XMLAccess, de una en una
 
 - **Corrección:** DX responde a veces con un HTTP 200 vacío cuando recibe peticiones XMLAccess simultáneas; el recurso

@@ -5,7 +5,7 @@
 Para volver a una versión anterior: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <versión> --reuse-values`
 (la 0.3.0 renombró los recursos: mira sus notas).
 
-## Sin publicar · Cookie de sesión OIDC WAS_p...
+## 0.3.2 · 2026-11-12 · Cookie de sesión OIDC WAS_p...
 
 - **Corrección:** con OpenID Connect, Liberty llama a la cookie de SSO de DX `WAS_<letra><hash>`, y la letra depende del
   DX (`WAS_n...` en el DX de los labs, `WAS_p...` en otro DX Compose CF239). El operador solo aceptaba `WAS_n...`: el

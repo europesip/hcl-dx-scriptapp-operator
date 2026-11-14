@@ -1,0 +1,33 @@
+# TechDocs of the HCL DX Script Application operator: the docs/ folder, shown in the EUROPESIP Internal Developer
+# Portal (Backstage) through the annotation backstage.io/techdocs-ref of its catalog entity. Build locally (same as
+# Backstage):
+#   pip install mkdocs-techdocs-core==1.7.1 && mkdocs serve
+site_name: HCL DX Script Application operator
+site_description: Kubernetes operator that deploys HCL DX Script Applications and keeps them in DX as declared (not an HCL product)
+repo_url: https://github.com/europesip/hcl-dx-scriptapp-operator
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+plugins:
+  - techdocs-core
+
+# docs/specs/ (one spec per issue) is kept in the repository but left out of the site
+exclude_docs: |
+  specs/
+
+nav:
+  - Overview: index.md
+  - How it works: how-it-works.md
+  - Restrictions and limitations: limitations.md
+  - API reference: reference.md
+  - How we work: workflow.md
+  - Español:
+      - Introducción: index.es.md
+      - Cómo funciona: how-it-works.es.md
+      - Restricciones y limitaciones: limitations.es.md
+      - Cómo trabajamos: workflow.es.md
+
+# Heading anchors as GitHub makes them (accents kept: #instalación), so the same links work on GitHub and here
+markdown_extensions:
+  - toc:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}

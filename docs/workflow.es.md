@@ -51,7 +51,7 @@ para las mejoras y otra para los bugs. Gráficos: estado actual, evolución del 
 ## 5 · Hacia el desarrollo guiado por especificaciones
 
 Para los cambios con un esfuerzo de 5 o más, la especificación vive también en el repositorio:
-`docs/specs/<número>-<nombre-corto>.md`, a partir de [docs/specs/TEMPLATE.md](specs/TEMPLATE.md). Se revisa y se fusiona
+`docs/specs/<número>-<nombre-corto>.md`, a partir de [docs/specs/TEMPLATE.md](https://github.com/europesip/hcl-dx-scriptapp-operator/blob/main/docs/specs/TEMPLATE.md). Se revisa y se fusiona
 (*Approved*) **antes** de la implementación, y el pull request que cierra el issue la marca como *Implemented*. Una
 especificación versionada es la entrada de la implementación, la escriba una persona o un agente de IA, y la
 referencia de su revisión.

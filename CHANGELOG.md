@@ -5,6 +5,13 @@
 To go back to an earlier release: `helm upgrade dxop oci://ghcr.io/europesip/charts/hcl-dx-scriptapp-operator --version <version> --reuse-values`
 (0.3.0 renamed the resources: see its notes).
 
+## Unreleased
+
+- **TechDocs for Backstage** (#6): `mkdocs.yml` and a docs home page (`docs/index.md`, `docs/index.es.md`), so the
+  EUROPESIP Internal Developer Portal shows the operator documentation. Links from `docs/` to files outside it (and to
+  `docs/specs/`) are absolute GitHub links, also in `hack/gen-reference.py`. No change to the operator, the CRDs or
+  the chart.
+
 ## 0.3.2 · 2026-11-12 · OIDC session cookie WAS_p...
 
 - **Fix:** with OpenID Connect, Liberty names the DX SSO cookie `WAS_<letter><hash>`, and the letter depends on the DX

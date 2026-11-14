@@ -30,7 +30,7 @@ def rows(schema, prefix, out, required=()):
         if s.get("type") == "array" and "properties" in s.get("items", {}):
             rows(s["items"], path + "[]", out, s["items"].get("required", ()))
 
-md = ["# API reference (dx.europesip.com/v1alpha1)", "", "[README](../README.md) · generated from the CRDs by `hack/gen-reference.py`", ""]
+md = ["# API reference (dx.europesip.com/v1alpha1)", "", "[README](https://github.com/europesip/hcl-dx-scriptapp-operator#readme) · generated from the CRDs by `hack/gen-reference.py`", ""]
 for k in ORDER:
     c = crds[k]
     v = c["spec"]["versions"][0]

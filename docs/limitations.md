@@ -1,6 +1,6 @@
 # Restrictions and limitations
 
-[Español](limitations.es.md) · [README](../README.md)
+[Español](limitations.es.md) · [README](https://github.com/europesip/hcl-dx-scriptapp-operator#readme)
 
 ## Script Applications
 

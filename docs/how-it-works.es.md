@@ -1,6 +1,6 @@
 # Cómo funciona el operador
 
-[English](how-it-works.md) · [README](../README.es.md)
+[English](how-it-works.md) · [README](https://github.com/europesip/hcl-dx-scriptapp-operator/blob/main/README.es.md)
 
 ## Las piezas
 

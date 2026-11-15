@@ -1,0 +1,39 @@
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# catalog-info.yaml · Entry of this repository in the EUROPESIP developer portal (Backstage)
+#
+# What it is for
+#   Backstage (https://backstage.k3s.europesip.com) is the internal developer portal (IDP) of EUROPESIP: a catalog of
+#   every product, service and repository, with its owner, its links and how it relates to the rest. Backstage reads
+#   the GitHub organization "europesip" through the read-only GitHub App "europesip-backstage" and creates a catalog
+#   entry for every repository that has THIS file at its root. Without it, the repository does not appear on its own.
+#
+# What it is NOT
+#   It is not used by the operator, its build, its container image or its Helm chart: changing or deleting it only changes how the repository is shown in Backstage
+#   (picked up within about 30 minutes).
+#
+# Format: Backstage descriptor format, https://backstage.io/docs/features/software-catalog/descriptor-format
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: Component                       # a piece of software (a Kubernetes operator that runs in the cluster)
+metadata:
+  name: dxop                        # unique id in the catalog (lower case, no spaces); other entities point to it
+  title: DX Script App Operator, by EUROPESIP
+  description: >-
+    Kubernetes operator by EuropeSIP that declares HCL DX Script Applications, pages, DAM assets, themes and databases as Kubernetes resources (GitOps with Argo CD).
+  tags: [hcl-dx, dx-compose, operator, kubernetes, gitops]    # free labels, used by the catalog search and filters
+  annotations:
+    # GitHub repository of this component: Backstage uses it for the links and the GitHub cards of the entity page
+    github.com/project-slug: europesip/hcl-dx-scriptapp-operator
+    # where the source lives (the "View source" button)
+    backstage.io/source-location: url:https://github.com/europesip/hcl-dx-scriptapp-operator/tree/main/
+    # TechDocs: Backstage builds the docs with mkdocs.yml (this same repository) and shows them in the Docs tab
+    backstage.io/techdocs-ref: dir:.
+  links:                              # buttons in the "Links" card of the entity page
+    - { url: 'https://github.com/europesip/hcl-dx-scriptapp-operator#readme', title: README, icon: docs }
+    - { url: 'https://github.com/europesip/hcl-dx-scriptapp-operator/releases', title: Releases }
+    - { url: 'https://github.com/orgs/europesip/projects/3', title: Roadmap (GitHub project) }
+spec:
+  type: service                     # kind of component (service, library, website, documentation)
+  lifecycle: production               # experimental | production | deprecated
+  owner: plataforma                   # team that answers for it (a Group of the catalog)
+  system: gitops                    # the larger system it belongs to
